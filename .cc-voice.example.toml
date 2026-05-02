@@ -1,5 +1,7 @@
 # CC-Voice configuration
 # Copy to .cc-voice.toml and adjust as needed.
+#
+# Handler-name values for [vlm] are listed in docs/architecture.md.
 
 # TTS settings (env overrides: CC_TTS_ENGINE, CC_TTS_VOICE, CC_TTS_SPEED,
 # CC_TTS_AUTO_READ, CC_TTS_MAX_CHARS, CC_TTS_PLAYER)
@@ -11,10 +13,31 @@ max_chars = 2000             # Truncate input text beyond this limit
 player = "auto"              # "mpv" | "ffplay" | "aplay" | "auto"
 
 # STT settings (env overrides: CC_STT_ENGINE, CC_STT_LANGUAGE,
-# CC_STT_WAKE_WORD, CC_STT_MIC_DEVICE, CC_STT_AUTO_LISTEN)
+# CC_STT_WAKE_WORD, CC_STT_MIC_DEVICE, CC_STT_AUTO_LISTEN,
+# CC_STT_STRIP_FILLERS, CC_STT_INTENT_MATCH, CC_STT_MAX_WORDS)
 [stt]
 engine = "auto"              # "moonshine" | "vosk" | "auto"
 language = "en"
 wake_word = "hey_claude"
 mic_device = "default"
 auto_listen = false          # Start listening on session start
+strip_fillers = true         # Remove "um", "uh", "like" before sending to LLM
+intent_match = true          # Match common commands locally (skip LLM)
+max_words = 200              # Hard word cap on transcriptions
+
+# VLM settings (env overrides: CC_VLM_ENGINE, CC_VLM_MODEL_PATH,
+# CC_VLM_MMPROJ_PATH, CC_VLM_HANDLER_NAME, CC_VLM_N_CTX,
+# CC_VLM_N_GPU_LAYERS, CC_VLM_MAX_TOKENS, CC_VLM_MAX_DIMENSION,
+# CC_VLM_JPEG_QUALITY, CC_VLM_TEMPLATE, CC_VLM_CACHE_SIZE)
+[vlm]
+engine = "auto"              # "auto" | "llamacpp"
+model_path = ""              # Absolute path to .gguf vision model
+mmproj_path = ""             # Absolute path to mmproj (CLIP projector) .gguf
+handler_name = "qwen2.5vl"   # Chat handler — see docs/architecture.md
+n_ctx = 4096                 # Context window
+n_gpu_layers = 0             # 0 = CPU only, -1 = all layers to GPU
+max_tokens = 256             # Max VLM response tokens
+max_dimension = 768          # Resize longest edge before VLM (tokens ∝ dimension²)
+jpeg_quality = 85
+template = "generic"         # Default template if --template not passed
+cache_size = 32              # Per-invocation LRU entries
