@@ -9,6 +9,7 @@
 ### Changed
 
 - docs: dedupe config schema — `.cc-voice.example.toml` is the single source of truth for `.cc-voice.toml` fields and `CC_*` env overrides; README and `skills/*/SKILL.md` link to it instead of embedding partial copies. README slimmed 185 → 73 lines; SKILL.md sum 275 → 182 lines (#83, closes #60)
+- chore: slim `.cc-voice.toml` from 47 to 8 lines — removes the duplicated full schema; only fields that override the example defaults remain. Behavior unchanged; `.cc-voice.example.toml` is now the canonical schema reference (#87, refs #60)
 - docs(roadmap): mark v0.5.0/v0.6.0 as shipped; drop closed #29/#33/#34 from "Tracked" (#81)
 
 ### Fixed
@@ -17,7 +18,11 @@
 
 ### Removed
 
-- chore: orphan `scripts/debug_pty_capture.py` — parent feature (PTY proxy) is parked (#84, refs #56)
+- chore: orphan `scripts/debug_pty_capture.py` — parent feature (PTY proxy) is parked (#84, closes #56 line item)
+
+### Tests
+
+- test(speak): add `--stop` and `--stream` coverage — 7 new tests (3 → 10 total) covering pidfile lifecycle, SIGTERM dispatch to recorded pgid, ProcessLookupError graceful handling, and streaming flag routing through `edge_stream.speak_streaming` (#88, closes #56 line item)
 
 ### Internal
 
