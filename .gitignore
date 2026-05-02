@@ -44,6 +44,7 @@
 /.zshrc
 /.gitconfig
 /.gitmodules
+/.mcp.json
 /.ripgreprc
 
 # created as empty files, not dirs — bypass trailing-slash gitignore patterns
@@ -65,6 +66,7 @@ dist/
 
 # Claude Code local overrides
 .claude/settings.local.json
+.env
 
 # Auto-memory seed (created by session hooks, not project code)
 MEMORY.md
