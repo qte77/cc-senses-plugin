@@ -5,6 +5,7 @@
 
 # TTS settings (env overrides: CC_TTS_ENGINE, CC_TTS_VOICE, CC_TTS_SPEED,
 # CC_TTS_AUTO_READ, CC_TTS_MAX_CHARS, CC_TTS_PLAYER)
+[tts]
 engine = "auto"              # "kokoro" | "piper" | "espeak" | "auto"
 voice = "en_US-amy-medium"   # Engine-specific voice name
 speed = 1.0                  # Playback speed multiplier
