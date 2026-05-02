@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+### Added
+
+- docs: `docs/UserStory.md` — three end-to-end flows (Voice Loop, screen-content-to-Claude, hotkey-stopped playback) and three personas (#83)
+
+### Changed
+
+- docs: dedupe config schema — `.cc-voice.example.toml` is the single source of truth for `.cc-voice.toml` fields and `CC_*` env overrides; README and `skills/*/SKILL.md` link to it instead of embedding partial copies. README slimmed 185 → 73 lines; SKILL.md sum 275 → 182 lines (#83, closes #60)
+- docs(roadmap): mark v0.5.0/v0.6.0 as shipped; drop closed #29/#33/#34 from "Tracked" (#81)
+
+### Fixed
+
+- fix(config): wrap TTS keys in `[tts]` section in `.cc-voice.example.toml` — top-level TTS keys were silently ignored by the `load_toml_section("tts")` loader (#83)
+
+### Removed
+
+- chore: orphan `scripts/debug_pty_capture.py` — parent feature (PTY proxy) is parked (#84, refs #56)
+
+### Internal
+
+- chore: gitignore phantom `/.mcp.json` (sandbox char-device) and `.env` (per-machine secrets) (#82)
+
 ## [0.6.0] - 2026-04-23
 
 ### Added
