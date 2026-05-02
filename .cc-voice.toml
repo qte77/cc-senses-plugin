@@ -1,47 +1,8 @@
-# cc-voice configuration
-# Single config file for all three skills: /speak, /listen, /see.
-# Loaded from project root (searched upward from cwd).
-#
-# Every field below can be overridden via environment variable:
-#   [tts]  field → CC_TTS_<FIELD>    e.g. engine → CC_TTS_ENGINE
-#   [stt]  field → CC_STT_<FIELD>    e.g. engine → CC_STT_ENGINE
-#   [vlm]  field → CC_VLM_<FIELD>    e.g. model_path → CC_VLM_MODEL_PATH
-# Env vars take precedence over TOML values. Accepted values and defaults
-# are documented inline per field below.
+# Project-recommended dev defaults for cc-voice.
+# See .cc-voice.example.toml for the full schema, defaults, and env overrides.
+# This file lists only fields that override the example defaults.
 
 [tts]
-engine = "edge"              # "kokoro" | "edge" | "piper" | "espeak" | "auto" (kokoro > edge > piper > espeak)
-voice = "af_sarah"           # kokoro voice name (see kokoro-tts --list-voices)
-speed = 1.0
-auto_read = true             # true = auto-speak every Claude response via Stop hook
-                             #
-                             # Two TTS modes (do not combine — causes double speaking):
-                             #   Batch (Stop hook):     make run_voice         ~2-5s after response ends
-                             #   Streaming (PTY proxy): make run_voice_stream  ~0.5s, sentence-by-sentence
-                             #
-                             # The Stop hook is always registered in .claude/settings.json
-                             # but is a no-op when auto_read = false (exits in <100ms).
-                             # When true, the handler forks — CC unblocks immediately while
-                             # audio plays in background.
-max_chars = 2000
-player = "auto"              # "mpv" | "ffplay" | "aplay" | "auto"
-
-[stt]
-engine = "auto"              # "moonshine" | "vosk" | "auto"
-language = "en"
-wake_word = "hey_claude"
-mic_device = "default"
-auto_listen = false
-
-[vlm]
-engine = "auto"              # "llamacpp" | "auto"
-model_path = ""              # absolute path to .gguf vision model (download first — see skills/see/SKILL.md)
-mmproj_path = ""             # absolute path to mmproj .gguf (CLIP projector)
-handler_name = "qwen2.5vl"   # "qwen2.5vl" | "llava15" | "llava16" | "moondream" | "minicpmv" | "nanollava"
-n_ctx = 4096
-n_gpu_layers = 0             # 0 = CPU only, -1 = all layers to GPU
-max_tokens = 256
-max_dimension = 768          # resize longest edge before VLM (768 = sweet spot for local)
-jpeg_quality = 85
-template = "generic"         # "terminal" | "editor" | "browser" | "gui" | "generic"
-cache_size = 32
+engine = "edge"      # example default: "auto"
+voice = "af_sarah"   # example default: "en_US-amy-medium"
+auto_read = true     # example default: false
