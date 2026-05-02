@@ -26,21 +26,7 @@ python -m cc_stt $ARGUMENTS
 
 ## Configuration
 
-Edit `.cc-voice.toml` in project root:
-
-```toml
-[stt]
-engine = "auto"          # "moonshine" | "vosk" | "auto"
-language = "en"
-wake_word = "hey_claude"
-mic_device = "default"
-auto_listen = false
-strip_fillers = true     # remove "um", "uh", "like", etc. before sending to LLM
-intent_match = true      # match common commands locally (skip LLM)
-max_words = 200          # hard word cap on transcriptions
-```
-
-Environment overrides: `CC_STT_ENGINE`, `CC_STT_LANGUAGE`, `CC_STT_WAKE_WORD`, `CC_STT_MIC_DEVICE`, `CC_STT_AUTO_LISTEN`, `CC_STT_STRIP_FILLERS`, `CC_STT_INTENT_MATCH`, `CC_STT_MAX_WORDS`.
+See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[stt]` section for the full schema and `CC_STT_*` env overrides.
 
 ## Status
 

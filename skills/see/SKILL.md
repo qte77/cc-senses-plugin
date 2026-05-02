@@ -1,6 +1,6 @@
 ---
 name: see
-description: Capture screen content and get a text description via an in-process VLM (llama-cpp-python). No daemon. Use for pair programming, reading terminal output, summarizing editor state, or sharing visual context with Claude with minimal token cost.
+description: Capture the screen and inject a short text summary into Claude's context via an in-process VLM (llama-cpp-python). No daemon. Use to feed terminal/editor/browser state to Claude for debug, fix suggestions, or summarization with minimal token cost.
 compatibility: Designed for Claude Code
 metadata:
   allowed-tools: Bash, Read, Write
@@ -11,7 +11,7 @@ metadata:
 
 # /see
 
-Capture the screen, run a local vision-language model (Qwen2.5-VL by default via llama-cpp-python), and return a short text description for injection into Claude's context. Token-efficient: ~120 tokens per call vs ~1,600 for sending the raw image to Claude's vision API. **No external daemon** — model runs in-process via llama-cpp-python.
+Capture the screen, run a local vision-language model (Qwen2.5-VL by default via llama-cpp-python), and inject a short text description into Claude's context for Claude to act on. ~120 tokens per call vs ~1,600 if you sent the raw image to Claude's vision API. **No external daemon** — model runs in-process via llama-cpp-python.
 
 ## Install — three steps
 
@@ -36,15 +36,7 @@ wget https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Q
 wget https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf
 ```
 
-Then configure `.cc-voice.toml`:
-
-```toml
-[vlm]
-engine = "llamacpp"
-model_path = "/home/USER/.cache/cc-voice/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf"
-mmproj_path = "/home/USER/.cache/cc-voice/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf"
-handler_name = "qwen2.5vl"
-```
+Then point `[vlm].model_path` and `[vlm].mmproj_path` at the downloaded files. See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) for the full `[vlm]` schema.
 
 ## Usage
 
@@ -89,54 +81,13 @@ python -m cc_vlm $ARGUMENTS
 
 ## Configuration
 
-Full `.cc-voice.toml` schema:
+See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[vlm]` section for the full schema and `CC_VLM_*` env overrides. Supported `handler_name` values are listed in [`docs/architecture.md`](../../docs/architecture.md#supported-vlm-models-llama-cpp-python-handlers).
 
-```toml
-[vlm]
-engine = "auto"                     # "auto" | "llamacpp"
-model_path = ""                     # absolute path to .gguf vision model
-mmproj_path = ""                    # absolute path to mmproj (CLIP projector) .gguf
-handler_name = "qwen2.5vl"          # chat handler for this model family (see below)
-n_ctx = 4096                        # context window
-n_gpu_layers = 0                    # 0 = CPU only, -1 = all layers to GPU
-max_tokens = 256                    # max VLM response tokens
-max_dimension = 768                 # resize longest edge before VLM (tokens ∝ dimension²)
-jpeg_quality = 85
-template = "generic"                # default template if --template not passed
-cache_size = 32                     # per-invocation LRU entries
-```
+## Token budget and rationale
 
-**Supported handler_name values**:
+For the in-process-VLM-vs-Claude-Vision token comparison and the rationale for picking llama-cpp-python over Ollama, see [`docs/architecture.md`](../../docs/architecture.md#vlm-token-budget) and [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
 
-- `qwen2.5vl` → `Qwen25VLChatHandler` (default, works with Qwen2.5-VL-2B/3B/7B)
-- `llava15` → `Llava15ChatHandler` (LLaVA 1.5)
-- `llava16` → `Llava16ChatHandler` (LLaVA 1.6)
-- `moondream` → `MoondreamChatHandler` (Moondream2)
-- `minicpmv` → `MiniCPMv26ChatHandler` (MiniCPM-V 2.6)
-- `nanollava` → `NanollavaChatHandler`
-
-Environment overrides: `CC_VLM_ENGINE`, `CC_VLM_MODEL_PATH`, `CC_VLM_MMPROJ_PATH`, `CC_VLM_HANDLER_NAME`, `CC_VLM_N_CTX`, `CC_VLM_N_GPU_LAYERS`, `CC_VLM_MAX_TOKENS`, `CC_VLM_MAX_DIMENSION`, `CC_VLM_JPEG_QUALITY`, `CC_VLM_TEMPLATE`, `CC_VLM_CACHE_SIZE`.
-
-## Token budget
-
-| Path | Tokens per call | Notes |
-|---|---|---|
-| `/see` (in-process VLM → text) | ~120 | Default. No daemon, no HTTP round-trip. |
-| `/see` cache hit (unchanged screen) | 0 | Frame hashed via BLAKE3; same image+template = no VLM call |
-| Sending raw image to Claude vision (Tier 1, deferred) | ~1,600 | Opt-in via future `--vision` flag |
-
-Prompt templates cap the VLM's output length at the source (e.g., `terminal` says "Max 80 words. Fragments ok."), keeping injected context small regardless of screen content.
-
-## Why llama-cpp-python and not Ollama
-
-cc-voice prefers **lean w/o overhead**:
-
-- **No persistent daemon** — nothing running when `/see` isn't being called (Ollama holds ~2.5 GB RAM idle)
-- **No HTTP layer** — direct in-process Python call
-- **No separate system service** — fewer moving parts, nothing to start/stop
-- **~200-500 ms per-call** in the warm process (the ⭐ latency from ai-agents-research #84)
-
-Trade-off: llama-cpp-python isn't in the `[see]` extras because the correct wheel depends on your hardware (CPU / CUDA / Metal / ROCm). You install the variant matching your machine manually. `make setup_see` prints the three common install commands.
+For an end-to-end user flow (feeding screen content to Claude so it can debug or suggest fixes), see [`docs/UserStory.md`](../../docs/UserStory.md#flow-b-feed-screen-content-to-claude) Flow B.
 
 ## Removing changes made by `/see`
 
@@ -156,12 +107,4 @@ There is **no undo for past descriptions** that were injected into a Claude Code
 
 ## Status
 
-Development — functional MVP. Ships `LlamaCppVLMEngine` only. The following are explicit follow-ups tracked in the 0.4.x hardening roadmap:
-
-- **`OllamaVLMEngine`** — alternative backend for users who already run Ollama for other purposes (routing Claude Code, local chat) and want to reuse the daemon
-- **`ClaudeVisionEngine`** (Tier 1 fallback) — opt-in `--vision` flag to send the raw JPEG to Claude's vision API for cases where the local VLM's text isn't enough
-- **Crop to focused window** — OS-specific (xdotool / wlrctl / AppleScript) to auto-crop before VLM
-- **Auto-template detection** — pick the right template from the focused window's class name
-- **Persistent on-disk cache** — shared across processes (current cache is per-invocation)
-
-See `docs/adr/0003-vlm-screen-sharing.md` for architectural decision.
+Development — functional MVP. Ships `LlamaCppVLMEngine` only. Follow-ups (Ollama backend, Claude Vision opt-in, focused-window crop, auto-template detection, persistent cache) are tracked in the roadmap. See [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).

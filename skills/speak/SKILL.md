@@ -26,36 +26,14 @@ uv run python -m cc_tts.speak $ARGUMENTS
 
 ## Configuration
 
-Edit `.cc-voice.toml` in project root:
+See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[tts]` section for the full schema and `CC_TTS_*` env overrides.
 
-```toml
-[tts]
-engine = "auto"              # "kokoro" | "piper" | "espeak" | "auto"
-voice = "af_sarah"           # kokoro voice name
-speed = 1.0
-auto_read = false
-max_chars = 2000
-player = "auto"              # "mpv" | "ffplay" | "aplay" | "auto"
-```
+## Delivery modes
 
-Environment overrides: `CC_TTS_ENGINE`, `CC_TTS_VOICE`, `CC_TTS_SPEED`, `CC_TTS_AUTO_READ`.
+Three paths from text to audio (Stop hook, stream-json pipe, PTY proxy). See [`docs/architecture.md`](../../docs/architecture.md#tts-delivery-modes) for the comparison table and [`docs/adr/0001-tts-delivery-modes.md`](../../docs/adr/0001-tts-delivery-modes.md) for the rationale.
 
-## TTS modes
-
-Three delivery paths — see [../../docs/adr/0001-tts-delivery-modes.md](../../docs/adr/0001-tts-delivery-modes.md) for rationale.
-
-| Mode | Start with | Interactive | First audio | Notes |
-|---|---|---|---|---|
-| **Stop hook** (recommended) | `/speak --toggle` | ✓ | ~1-2s after response ends | Full Ink UI, sentence-by-sentence playback via SentenceBuffer |
-| **Stream-json pipe** | `cc-tts-stream "prompt"` | ✗ (one prompt) | ~0.5-1s | True mid-generation streaming, no Ink UI |
-| PTY proxy (legacy) | `cc-tts-wrap claude` | ✓ | ~0.5s if working | Brittle — scrapes Ink output, breaks on CC UI changes |
-
-**Do not combine Stop hook + PTY proxy** — causes double speaking.
+Do not combine Stop hook + PTY proxy — causes double speaking.
 
 ## Voice Loop (STT + TTS)
 
-Enable auto-read then use CC-native `/voice` for full bidirectional voice:
-
-1. `/speak --toggle` (enables auto-read)
-2. `/voice` (enables CC speech-to-text input)
-3. Speak → Claude transcribes → responds → speaks response
+For the full bidirectional flow (`/speak --toggle` → `/voice` → speak → response spoken back), see [`docs/UserStory.md`](../../docs/UserStory.md#flow-a-voice-loop) Flow A.
