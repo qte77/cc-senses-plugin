@@ -15,11 +15,15 @@
 - docs(roadmap): mark v0.5.0/v0.6.0 as shipped; drop closed #29/#33/#34 from "Tracked" (#81)
 - feat(vlm): default VLM handler flips from `qwen2.5vl` to `moondream` — Moondream2 is sub-1 GB Q4 GGUF, Apache 2.0, fastest CPU path; Qwen2.5-VL handler stays available as alt (#91)
 - docs(vlm): `skills/see/SKILL.md` install section collapsed from ~22 lines to ~6; all hardcoded Hugging Face + abetlen wheel-index URLs moved to `Makefile` variables — single source of truth. `docs/UserStory.md` Flow B and `docs/architecture.md` handler table updated to reflect Moondream2 default (#91)
+- docs(readme): Features bullet flipped to Moondream2 (Qwen2.5-VL noted as alt) (#93)
+- docs(skills): drop redundant `# /listen|/see|/speak` H1 from each `skills/*/SKILL.md` body — title is already in YAML frontmatter `name:`; removes drift surface (#94)
 
 ### Fixed
 
 - fix(vlm): replace inline Hugging Face URL in "No VLM engine available" `RuntimeError` with `make setup_see` pointer (#91)
 - fix(config): wrap TTS keys in `[tts]` section in `.cc-voice.example.toml` — top-level TTS keys were silently ignored by the `load_toml_section("tts")` loader (#83)
+- fix(readme): Link Checker badge URL pointed at non-existent `links-fail-fast.yaml` workflow — repointed at `lint-md-links.yml` (#93)
+- chore(changelog): merge duplicate `### Fixed` subsections under `[Unreleased]` to satisfy markdownlint MD024 (#93)
 
 ### Removed
 
