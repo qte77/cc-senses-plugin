@@ -211,11 +211,11 @@ def resolve_vlm_engine(
             return engine
 
     msg = (
-        "No VLM engine available. Install `uv sync --extra see` and set "
-        "[vlm] model_path + mmproj_path in .cc-voice.toml (or export "
-        "CC_VLM_MODEL_PATH and CC_VLM_MMPROJ_PATH). Download a Qwen2.5-VL "
-        "GGUF + mmproj from Hugging Face, e.g. "
-        "https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF"
+        "No VLM engine available. Run `make setup_see` for guided "
+        "installation (downloads models, prints the matching "
+        "llama-cpp-python install command for your hardware). Then set "
+        "[vlm] model_path + mmproj_path in .cc-voice.toml or export "
+        "CC_VLM_MODEL_PATH and CC_VLM_MMPROJ_PATH."
     )
     raise RuntimeError(msg)
 
