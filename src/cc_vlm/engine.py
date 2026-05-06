@@ -70,7 +70,7 @@ class LlamaCppVLMEngine:
         self,
         model_path: str = "",
         mmproj_path: str = "",
-        handler_name: str = "qwen2.5vl",
+        handler_name: str = "moondream",
         n_ctx: int = 4096,
         n_gpu_layers: int = 0,
         max_tokens: int = 256,
