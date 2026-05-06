@@ -8,8 +8,6 @@ metadata:
   stability: development
 ---
 
-# /speak
-
 Speak text aloud using local text-to-speech.
 
 ## Usage

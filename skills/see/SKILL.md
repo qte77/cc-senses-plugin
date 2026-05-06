@@ -9,8 +9,6 @@ metadata:
   stability: development
 ---
 
-# /see
-
 Capture the screen, run a local vision-language model (Moondream2 by default via llama-cpp-python), and inject a short text description into Claude's context for Claude to act on. ~120 tokens per call vs ~1,600 if you sent the raw image to Claude's vision API. **No external daemon** — model runs in-process via llama-cpp-python.
 
 ## Install

@@ -8,8 +8,6 @@ metadata:
   stability: development
 ---
 
-# /listen
-
 Transcribe speech using local speech-to-text.
 
 ## Usage
