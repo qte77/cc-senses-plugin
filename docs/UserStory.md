@@ -60,7 +60,7 @@ cc-voice's `/see` uses the local path by default.
 Steps:
 
 1. `/see --template terminal` — captures the active monitor, runs the
-   local VLM (default Qwen2.5-VL via llama-cpp-python) entirely
+   local VLM (default Moondream2 via llama-cpp-python) entirely
    on-device, and injects the short text description into Claude's
    prompt.
 2. Claude reads that text alongside the rest of the conversation and
@@ -75,13 +75,13 @@ Steps:
    - `--template gui` — active window, focused element, dialog text
    - `--template generic` — free-form ≤100-word description
 
-Minimal config:
+Minimal config (run `make setup_see` to populate the paths):
 
 ```toml
 [vlm]
-model_path = "/home/USER/.cache/cc-voice/models/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf"
-mmproj_path = "/home/USER/.cache/cc-voice/models/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf"
-handler_name = "qwen2.5vl"
+model_path = "/home/USER/.cache/cc-voice/models/moondream2-text-model-f16_ct-q4_0.gguf"
+mmproj_path = "/home/USER/.cache/cc-voice/models/moondream2-mmproj-f16.gguf"
+handler_name = "moondream"
 ```
 
 See [`docs/adr/0003-vlm-screen-sharing.md`](adr/0003-vlm-screen-sharing.md)

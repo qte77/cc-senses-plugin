@@ -94,12 +94,15 @@ Cold start: 3-5 s (model load). Warm page cache: 1-2 s. In-process reuse: 200-50
 
 | handler_name | llama_cpp class | Model family |
 |---|---|---|
-| `qwen2.5vl` (default) | `Qwen25VLChatHandler` | Qwen2.5-VL-2B/3B/7B |
+| `moondream` (default) | `MoondreamChatHandler` | Moondream2 (~0.9 GB Q4, fastest CPU path) |
+| `qwen2.5vl` | `Qwen25VLChatHandler` | Qwen2.5-VL-2B/3B/7B (richer output, ~1.6 GB Q4) |
 | `llava15` | `Llava15ChatHandler` | LLaVA 1.5 |
 | `llava16` | `Llava16ChatHandler` | LLaVA 1.6 |
-| `moondream` | `MoondreamChatHandler` | Moondream2 |
 | `minicpmv` | `MiniCPMv26ChatHandler` | MiniCPM-V 2.6 |
 | `nanollava` | `NanollavaChatHandler` | NanoLLaVA |
+
+Default chosen for smallest CPU footprint; install via `make setup_see`.
+For richer output swap to `qwen2.5vl` via `make setup_see_qwen25`.
 
 ### VLM token budget
 

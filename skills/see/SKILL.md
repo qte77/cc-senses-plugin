@@ -11,32 +11,17 @@ metadata:
 
 # /see
 
-Capture the screen, run a local vision-language model (Qwen2.5-VL by default via llama-cpp-python), and inject a short text description into Claude's context for Claude to act on. ~120 tokens per call vs ~1,600 if you sent the raw image to Claude's vision API. **No external daemon** — model runs in-process via llama-cpp-python.
+Capture the screen, run a local vision-language model (Moondream2 by default via llama-cpp-python), and inject a short text description into Claude's context for Claude to act on. ~120 tokens per call vs ~1,600 if you sent the raw image to Claude's vision API. **No external daemon** — model runs in-process via llama-cpp-python.
 
-## Install — three steps
+## Install
 
 ```bash
-# 1. Core scaffolding deps (mss, Pillow, blake3)
-make setup_see
-
-# 2. llama-cpp-python (pick ONE matching your hardware)
-#    See `make setup_see` output for the exact commands.
-#    Examples:
-uv pip install 'llama-cpp-python' \
-  --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
-# or CUDA 12.4:
-# uv pip install 'llama-cpp-python' --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
-# or Metal:
-# CMAKE_ARGS='-DLLAMA_METAL=on' uv pip install llama-cpp-python
-
-# 3. Download the Qwen2.5-VL GGUF + mmproj files
-mkdir -p ~/.cache/cc-voice/models
-cd ~/.cache/cc-voice/models
-wget https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
-wget https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf
+make setup_see           # default: Moondream2 (~0.9 GB Q4, fastest CPU)
+# or
+make setup_see_qwen25    # alt: Qwen2.5-VL-3B (~1.6 GB Q4, richer output)
 ```
 
-Then point `[vlm].model_path` and `[vlm].mmproj_path` at the downloaded files. See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) for the full `[vlm]` schema.
+Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-voice/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-voice.toml`. See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) for the full `[vlm]` schema.
 
 ## Usage
 
