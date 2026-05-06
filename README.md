@@ -7,7 +7,7 @@
 [![CodeQL](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype/badge)](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype)
 [![Dependabot](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates)
-[![Link Checker](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/links-fail-fast.yaml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/links-fail-fast.yaml)
+[![Lint MD and Links](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/lint-md-links.yml)
 
 End-to-end voice plugin for Claude Code. TTS speaks Claude's responses aloud, STT captures voice input via Moonshine/Vosk, VLM ingests the screen and feeds it as text into Claude's context for Claude to act on.
 
@@ -15,7 +15,7 @@ End-to-end voice plugin for Claude Code. TTS speaks Claude's responses aloud, ST
 
 - **TTS** — `/speak` skill, Stop-hook auto-read, multi-engine (Kokoro / Piper / espeak-ng / edge-tts)
 - **STT** — `/listen` skill, Moonshine/Vosk auto-detect, mic capture with VAD, PTY injection
-- **VLM** — `/see` skill, in-process Qwen2.5-VL via llama-cpp-python, screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
+- **VLM** — `/see` skill, in-process Moondream2 via llama-cpp-python (Qwen2.5-VL alt), screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
 
 ## Audio Examples
 

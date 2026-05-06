@@ -19,9 +19,6 @@
 ### Fixed
 
 - fix(vlm): replace inline Hugging Face URL in "No VLM engine available" `RuntimeError` with `make setup_see` pointer (#91)
-
-### Fixed
-
 - fix(config): wrap TTS keys in `[tts]` section in `.cc-voice.example.toml` — top-level TTS keys were silently ignored by the `load_toml_section("tts")` loader (#83)
 
 ### Removed
