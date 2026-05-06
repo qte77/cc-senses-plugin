@@ -352,6 +352,17 @@ class TestResolveVLMEngine:
         with pytest.raises(RuntimeError, match="No VLM engine available"):
             resolve_vlm_engine("auto")
 
+    def test_auto_unavailable_message_points_at_setup_see(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+    ) -> None:
+        """Error message must reference `make setup_see`, not a hardcoded HF URL."""
+        with pytest.raises(RuntimeError) as exc_info:
+            resolve_vlm_engine("auto")
+        message = str(exc_info.value)
+        assert "make setup_see" in message
+        assert "huggingface.co" not in message
+
     def test_explicit_llamacpp_name(
         self,
         mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
