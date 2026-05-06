@@ -15,7 +15,7 @@ End-to-end voice plugin for Claude Code. TTS speaks Claude's responses aloud, ST
 
 - **TTS** — `/speak` skill, Stop-hook auto-read, multi-engine (Kokoro / Piper / espeak-ng / edge-tts)
 - **STT** — `/listen` skill, Moonshine/Vosk auto-detect, mic capture with VAD, PTY injection
-- **VLM** — `/see` skill, in-process Qwen2.5-VL via llama-cpp-python, screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
+- **VLM** — `/see` skill, in-process Moondream2 via llama-cpp-python (Qwen2.5-VL alt), screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
 
 ## Audio Examples
 
