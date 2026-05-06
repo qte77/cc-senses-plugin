@@ -15,7 +15,7 @@ class TestVLMConfigDefaults:
         assert config.engine == "auto"
         assert config.model_path == ""
         assert config.mmproj_path == ""
-        assert config.handler_name == "qwen2.5vl"
+        assert config.handler_name == "moondream"
         assert config.n_ctx == 4096
         assert config.n_gpu_layers == 0
         assert config.max_tokens == 256

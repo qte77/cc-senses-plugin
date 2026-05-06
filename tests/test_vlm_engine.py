@@ -44,6 +44,7 @@ def mock_llama_cpp() -> tuple[MagicMock, MagicMock, MagicMock]:
     # Chat handler classes — each is itself a callable returning a mock
     fake_chat_format_module.Qwen25VLChatHandler = MagicMock(return_value=MagicMock())
     fake_chat_format_module.Llava15ChatHandler = MagicMock(return_value=MagicMock())
+    fake_chat_format_module.MoondreamChatHandler = MagicMock(return_value=MagicMock())
 
     saved_llama = sys.modules.get("llama_cpp")
     saved_chat = sys.modules.get("llama_cpp.llama_chat_format")
@@ -94,7 +95,7 @@ class TestLlamaCppVLMEngineDefaults:
         engine = LlamaCppVLMEngine()
         assert engine.model_path == ""
         assert engine.mmproj_path == ""
-        assert engine.handler_name == "qwen2.5vl"
+        assert engine.handler_name == "moondream"
         assert engine.n_ctx == 4096
         assert engine.n_gpu_layers == 0
         assert engine.max_tokens == 256
@@ -175,6 +176,22 @@ class TestLlamaCppVLMEngineAvailable:
         model.write_bytes(b"x")
         mmproj.write_bytes(b"x")
         engine = LlamaCppVLMEngine(model_path=str(model), mmproj_path=str(mmproj))
+        assert engine.available() is True
+
+    def test_available_with_moondream_handler(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+        tmp_path: Path,
+    ) -> None:
+        model = tmp_path / "m.gguf"
+        mmproj = tmp_path / "mm.gguf"
+        model.write_bytes(b"x")
+        mmproj.write_bytes(b"x")
+        engine = LlamaCppVLMEngine(
+            model_path=str(model),
+            mmproj_path=str(mmproj),
+            handler_name="moondream",
+        )
         assert engine.available() is True
 
 
@@ -335,6 +352,17 @@ class TestResolveVLMEngine:
         with pytest.raises(RuntimeError, match="No VLM engine available"):
             resolve_vlm_engine("auto")
 
+    def test_auto_unavailable_message_points_at_setup_see(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+    ) -> None:
+        """Error message must reference `make setup_see`, not a hardcoded HF URL."""
+        with pytest.raises(RuntimeError) as exc_info:
+            resolve_vlm_engine("auto")
+        message = str(exc_info.value)
+        assert "make setup_see" in message
+        assert "huggingface.co" not in message
+
     def test_explicit_llamacpp_name(
         self,
         mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
@@ -346,6 +374,24 @@ class TestResolveVLMEngine:
         mmproj.write_bytes(b"x")
         engine = resolve_vlm_engine("llamacpp", model_path=str(model), mmproj_path=str(mmproj))
         assert isinstance(engine, LlamaCppVLMEngine)
+
+    def test_auto_resolves_with_moondream_handler(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+        tmp_path: Path,
+    ) -> None:
+        model = tmp_path / "m.gguf"
+        mmproj = tmp_path / "mm.gguf"
+        model.write_bytes(b"x")
+        mmproj.write_bytes(b"x")
+        engine = resolve_vlm_engine(
+            "auto",
+            model_path=str(model),
+            mmproj_path=str(mmproj),
+            handler_name="moondream",
+        )
+        assert isinstance(engine, LlamaCppVLMEngine)
+        assert engine.handler_name == "moondream"
 
     def test_unknown_engine_name_raises(self) -> None:
         with pytest.raises(ValueError, match="Unknown engine"):
