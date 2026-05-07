@@ -4,26 +4,22 @@
 
 ### Added
 
-- docs: `docs/UserStory.md` — three end-to-end flows (Voice Loop, screen-content-to-Claude, hotkey-stopped playback) and three personas (#83)
-- feat(make): `setup_see` and `setup_see_qwen25` Makefile targets — install `--extra see`, download the GGUF + mmproj into `~/.cache/cc-voice/models/`, detect host hardware and print the matching `llama-cpp-python` install command, then print the `[vlm]` snippet for `.cc-voice.toml` (#91)
-- test(make): `tests/test_makefile_targets.py` smoke-tests the new setup_see targets via `make -n` dry-run (#91)
+- docs: `docs/UserStory.md` — three end-to-end flows + personas (#83)
+- feat(vlm): `make setup_see` / `setup_see_qwen25` targets — guided VLM install with hardware detection; download URLs centralized in Makefile vars (#91)
+- docs: `docs/landscape.md` — engine/model evaluation matrix (single source of truth for shipped / deferred / rejected per subsystem)
 
 ### Changed
 
-- docs: dedupe config schema — `.cc-voice.example.toml` is the single source of truth for `.cc-voice.toml` fields and `CC_*` env overrides; README and `skills/*/SKILL.md` link to it instead of embedding partial copies. README slimmed 185 → 73 lines; SKILL.md sum 275 → 182 lines (#83, closes #60)
-- chore: slim `.cc-voice.toml` from 47 to 8 lines — removes the duplicated full schema; only fields that override the example defaults remain. Behavior unchanged; `.cc-voice.example.toml` is now the canonical schema reference (#87, refs #60)
-- docs(roadmap): mark v0.5.0/v0.6.0 as shipped; drop closed #29/#33/#34 from "Tracked" (#81)
-- feat(vlm): default VLM handler flips from `qwen2.5vl` to `moondream` — Moondream2 is sub-1 GB Q4 GGUF, Apache 2.0, fastest CPU path; Qwen2.5-VL handler stays available as alt (#91)
-- docs(vlm): `skills/see/SKILL.md` install section collapsed from ~22 lines to ~6; all hardcoded Hugging Face + abetlen wheel-index URLs moved to `Makefile` variables — single source of truth. `docs/UserStory.md` Flow B and `docs/architecture.md` handler table updated to reflect Moondream2 default (#91)
-- docs(readme): Features bullet flipped to Moondream2 (Qwen2.5-VL noted as alt) (#93)
-- docs(skills): drop redundant `# /listen|/see|/speak` H1 from each `skills/*/SKILL.md` body — title is already in YAML frontmatter `name:`; removes drift surface (#94)
+- feat(vlm): default VLM handler flips `qwen2.5vl` → `moondream` (Qwen2.5-VL stays available as alt) (#91)
+- docs: dedupe config schema — `.cc-voice.example.toml` is canonical; README + `skills/*/SKILL.md` link to it (#83, #87, closes #60)
+- docs(roadmap): mark v0.5.0/v0.6.0 as shipped; trim closed-issue noise (#81)
+- docs(skills): drop redundant H1 from each `skills/*/SKILL.md` — title lives in YAML frontmatter (#94)
 
 ### Fixed
 
-- fix(vlm): replace inline Hugging Face URL in "No VLM engine available" `RuntimeError` with `make setup_see` pointer (#91)
-- fix(config): wrap TTS keys in `[tts]` section in `.cc-voice.example.toml` — top-level TTS keys were silently ignored by the `load_toml_section("tts")` loader (#83)
-- fix(readme): Link Checker badge URL pointed at non-existent `links-fail-fast.yaml` workflow — repointed at `lint-md-links.yml` (#93)
-- chore(changelog): merge duplicate `### Fixed` subsections under `[Unreleased]` to satisfy markdownlint MD024 (#93)
+- fix(vlm): "No VLM engine available" `RuntimeError` points at `make setup_see` instead of an inline HF URL (#91)
+- fix(config): wrap TTS keys in `[tts]` section in `.cc-voice.example.toml` (#83)
+- fix(readme): Link Checker badge URL repointed at `lint-md-links.yml` (was 404 on missing workflow) (#93)
 
 ### Removed
 
@@ -31,7 +27,7 @@
 
 ### Tests
 
-- test(speak): add `--stop` and `--stream` coverage — 7 new tests (3 → 10 total) covering pidfile lifecycle, SIGTERM dispatch to recorded pgid, ProcessLookupError graceful handling, and streaming flag routing through `edge_stream.speak_streaming` (#88, closes #56 line item)
+- test(speak): `--stop` and `--stream` coverage — pidfile lifecycle, SIGTERM dispatch, streaming flag routing (#88, closes #56 line item)
 
 ### Internal
 
