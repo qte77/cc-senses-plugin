@@ -68,7 +68,7 @@ See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[vlm]` section for
 
 ## Token budget and rationale
 
-For the in-process-VLM-vs-Claude-Vision token comparison and the rationale for picking llama-cpp-python over Ollama, see [`docs/architecture.md`](../../docs/architecture.md#vlm-token-budget) and [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
+For the in-process-VLM-vs-Claude-Vision token comparison and the rationale for picking in-process `llama-cpp-python` over external daemons (Ollama, llama-server), see [`docs/architecture.md`](../../docs/architecture.md#vlm-engine-comparison) and [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
 
 For an end-to-end user flow (feeding screen content to Claude so it can debug or suggest fixes), see [`docs/UserStory.md`](../../docs/UserStory.md#flow-b-feed-screen-content-to-claude) Flow B.
 
@@ -90,4 +90,4 @@ There is **no undo for past descriptions** that were injected into a Claude Code
 
 ## Status
 
-Development — functional MVP. Ships `LlamaCppVLMEngine` only. Follow-ups (Ollama backend, Claude Vision opt-in, focused-window crop, auto-template detection, persistent cache) are tracked in the roadmap. See [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
+Development — functional MVP. Ships `LlamaCppVLMEngine` only. Follow-ups (`LlamaServerVLMEngine` HTTP backend, Claude Vision opt-in, focused-window crop, auto-template detection, persistent cache) are tracked in the roadmap. See [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
