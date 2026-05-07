@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  issues: write  # required by reusable workflow's notify job (gated on opt-in input; declared so caller permits the subset)
 
 jobs:
   lint:
