@@ -84,8 +84,10 @@ Engine priority (auto-detect order): `llamacpp` (only MVP engine)
 | Engine | Backend | Daemon | RAM idle | Latency (warm) | Notes |
 |---|---|---|---|---|---|
 | **llamacpp** (default) | llama-cpp-python | None | 0 | ~200-500 ms | In-process; no HTTP |
-| OllamaVLMEngine (planned) | Ollama | Yes | ~2.5 GB | ~200-500 ms | For users already running Ollama |
+| LlamaServerVLMEngine (planned) | `llama-server` HTTP | Yes (user-managed) | ~1-2 GB | ~200-500 ms | Same llama.cpp binary as in-process; unlocks SmolVLM2, Qwen3-VL, and any GGUF llama.cpp supports without waiting for `abetlen/llama-cpp-python` handler PRs |
 | ClaudeVisionEngine (deferred) | Claude Vision API | None | 0 | ~1-3 s | ~1,600 tokens/call; opt-in `--vision` |
+
+**Why `llama-server` and not Ollama**: same llama.cpp binary already used by the in-process path, no extra daemon family to support, no Ollama-as-dependency. Ollama was considered and rejected on those grounds during the #91 research pass.
 
 BLAKE3 frame cache: unchanged screen + same template = 0 VLM calls.
 Cold start: 3-5 s (model load). Warm page cache: 1-2 s. In-process reuse: 200-500 ms.
