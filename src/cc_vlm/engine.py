@@ -57,11 +57,11 @@ class LlamaCppVLMEngine:
     Within a single Python process after first call: 200-500 ms per
     describe() (the ⭐ latency cited in ai-agents-research #84).
 
-    Default handler is Qwen2.5-VL. For other model families set
+    Default handler is Moondream2. For other model families set
     `handler_name` in config to one of:
+      - "moondream" → MoondreamChatHandler  (default)
       - "qwen2.5vl" → Qwen25VLChatHandler
       - "llava15"/"llava16" → Llava15ChatHandler / Llava16ChatHandler
-      - "moondream" → MoondreamChatHandler
       - "minicpmv" → MiniCPMv26ChatHandler
       - "nanollava" → NanollavaChatHandler
     """
@@ -179,7 +179,7 @@ def resolve_vlm_engine(
     """Resolve a VLM engine by name or auto-detect first available.
 
     Auto-detect order: LlamaCppVLMEngine (only MVP engine). Future:
-    OllamaVLMEngine alternative, ClaudeVisionEngine fallback.
+    LlamaServerVLMEngine alternative, ClaudeVisionEngine fallback.
     """
     name_map: dict[str, type[LlamaCppVLMEngine]] = {
         "llamacpp": LlamaCppVLMEngine,
