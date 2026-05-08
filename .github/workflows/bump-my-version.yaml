@@ -27,37 +27,67 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set git config and create branch
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install bump-my-version
+        run: pip install "bump-my-version==1.3.0"
+
+      - name: Set git identity and create bump branch
+        env:
+          BRANCH_NEW: ${{ env.BRANCH_NEW }}
         run: |
           git config user.email "bumped@qte77.gha"
           git config user.name "bump-my-version"
-          git checkout -b "${{ env.BRANCH_NEW }}"
+          git checkout -b "$BRANCH_NEW"
 
-      - name: Bump version
+      - name: Bump version (commits + tags per pyproject [tool.bumpversion])
         id: bump
-        uses: callowayproject/bump-my-version@e6ecdc3e573698766cd6c2112faeda50bcc2e56a  # 1.3.0
         env:
-          BUMPVERSION_TAG: "true"
-        with:
-          args: ${{ inputs.bump_type }}
-          branch: ${{ env.BRANCH_NEW }}
+          BUMP_TYPE: ${{ inputs.bump_type }}
+        run: |
+          PREVIOUS_VERSION=$(bump-my-version show current_version)
+          echo "previous-version=$PREVIOUS_VERSION" >> "$GITHUB_OUTPUT"
+          bump-my-version bump "$BUMP_TYPE"
+          CURRENT_VERSION=$(bump-my-version show current_version)
+          echo "current-version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+          echo "bumped=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push branch and tag
+        env:
+          BRANCH_NEW: ${{ env.BRANCH_NEW }}
+        run: |
+          git push origin "$BRANCH_NEW" --follow-tags
 
       - name: Create PR
         if: steps.bump.outputs.bumped == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          BRANCH_NEW: ${{ env.BRANCH_NEW }}
+          SKIP_PR_HINT: ${{ env.SKIP_PR_HINT }}
+          PREVIOUS_VERSION: ${{ steps.bump.outputs.previous-version }}
+          CURRENT_VERSION: ${{ steps.bump.outputs.current-version }}
+          SCRIPT_PATH: ${{ env.SCRIPT_PATH }}
         run: |
-          src="${{ env.SCRIPT_PATH }}/create_pr.sh"
+          src="$SCRIPT_PATH/create_pr.sh"
           chmod +x "$src"
-          $src "${{ github.ref_name }}" "${{ env.BRANCH_NEW }}" "${{ env.SKIP_PR_HINT }}" "${{ steps.bump.outputs.previous-version }}" "${{ steps.bump.outputs.current-version }}"
+          "$src" "$REF_NAME" "$BRANCH_NEW" "$SKIP_PR_HINT" "$PREVIOUS_VERSION" "$CURRENT_VERSION"
 
       - name: Cleanup on failure
         if: failure() || cancelled()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH_NEW: ${{ env.BRANCH_NEW }}
+          CURRENT_VERSION: ${{ steps.bump.outputs.current-version }}
+          SCRIPT_PATH: ${{ env.SCRIPT_PATH }}
         run: |
-          src="${{ env.SCRIPT_PATH }}/delete_branch_pr_tag.sh"
+          src="$SCRIPT_PATH/delete_branch_pr_tag.sh"
           chmod +x "$src"
-          $src "${{ github.repository }}" "${{ env.BRANCH_NEW }}" "${{ steps.bump.outputs.current-version }}"
+          "$src" "$REPOSITORY" "$BRANCH_NEW" "$CURRENT_VERSION"
