@@ -3,7 +3,7 @@
 > **Status: Prototype** — end-to-end voice for Claude Code. TTS output via PTY proxy, STT input module scaffolded (config, engine, mic, VAD, PTY injection). Not production-ready.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-58f4c2.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.6.0-58f4c2.svg)
+![Version](https://img.shields.io/badge/version-0.7.0-58f4c2.svg)
 [![CodeQL](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype/badge)](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype)
 [![Dependabot](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates)

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-05-08
+
 ### Added
 
 - docs: `docs/UserStory.md` — three end-to-end flows + personas (#83)

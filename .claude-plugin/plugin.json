@@ -1,6 +1,6 @@
 {
   "name": "cc-voice",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "End-to-end voice for Claude Code. TTS output via /speak, STT input via /listen.",
   "author": {
     "name": "qte77"
