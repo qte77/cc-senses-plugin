@@ -89,6 +89,26 @@ Engine priority (auto-detect order): `llamacpp` → `llamaserver` (in-process pr
 
 **Why `llama-server` and not Ollama**: same llama.cpp binary already used by the in-process path, no extra daemon family to support, no Ollama-as-dependency. Ollama was considered and rejected on those grounds during the #91 research pass.
 
+### Server lifecycle
+
+`LlamaServerVLMEngine` supports three operational modes, selected by config:
+
+| Mode | Config | Spawn trigger | First-call latency |
+|---|---|---|---|
+| **User-managed** | `auto_spawn = false` | None (user runs `llama-server`) | Cold if user hasn't started it (engine returns "unreachable") |
+| **Lazy (default)** | `auto_spawn = true` | First `/see` call when `/health` probe fails | Up to ~30 s (model load) |
+| **Preload** (Phase 3) | `preload = true` | SessionStart hook | Hot from call 1; ~3-5 s background load at session start |
+
+The lifecycle helpers live in `src/cc_vlm/server_manager.py`:
+
+- PID file: `~/.cache/cc-senses-bridge/llama-server.pid`
+- Log file: `~/.cache/cc-senses-bridge/llama-server.log` (truncated on each spawn)
+- Auto-spawn is gated on `is_localhost(server_url)` — remote hosts are assumed externally managed and silently skip the spawn attempt.
+- `ensure_running()` is idempotent: probe `/health` first, then check the pidfile, only spawn as a last resort.
+- Concurrency: best-effort, no file lock. Parallel `/see` invocations during cold start may produce transient EADDRINUSE on the loser's spawn; the system self-heals on the next invocation via `pid_is_alive`.
+
+Manual control via Makefile targets: `make vlm_server_status` / `vlm_server_stop` / `vlm_server_logs`.
+
 BLAKE3 frame cache: unchanged screen + same template = 0 VLM calls.
 Cold start: 3-5 s (model load). Warm page cache: 1-2 s. In-process reuse: 200-500 ms.
 

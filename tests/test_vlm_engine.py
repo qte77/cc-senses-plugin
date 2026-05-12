@@ -676,3 +676,129 @@ class TestResolveVLMEngineWithLlamaServer:
         with pytest.raises(RuntimeError) as exc_info:
             resolve_vlm_engine("llamaserver", server_url="http://localhost:9999")
         assert "http://localhost:9999" in str(exc_info.value)
+
+
+class TestLlamaServerVLMEngineLazySpawn:
+    """available() with auto_spawn=True should call server_manager.ensure_running
+    when the initial /health probe fails. Engine doesn't import server_manager at
+    module load; it's used inside available() — patch via the cc_vlm.engine
+    module namespace."""
+
+    def test_lazy_spawn_when_unreachable(
+        self, mock_httpx: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        spawn_calls = {"n": 0}
+
+        def fake_ensure(*args: object, **kwargs: object) -> bool:
+            spawn_calls["n"] += 1
+            return True
+
+        from cc_vlm import server_manager
+
+        monkeypatch.setattr(server_manager, "ensure_running", fake_ensure)
+
+        engine = LlamaServerVLMEngine(
+            server_url="http://localhost:8080",
+            auto_spawn=True,
+            model_path="/m.gguf",
+            mmproj_path="/mm.gguf",
+            server_port=8080,
+            server_binary="llama-server",
+        )
+        assert engine.available() is True
+        assert spawn_calls["n"] == 1
+
+    def test_no_spawn_when_auto_spawn_false(
+        self, mock_httpx: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        spawn_calls = {"n": 0}
+
+        def fake_ensure(*args: object, **kwargs: object) -> bool:
+            spawn_calls["n"] += 1
+            return True
+
+        from cc_vlm import server_manager
+
+        monkeypatch.setattr(server_manager, "ensure_running", fake_ensure)
+
+        engine = LlamaServerVLMEngine(
+            server_url="http://localhost:8080",
+            auto_spawn=False,
+            model_path="/m.gguf",
+            mmproj_path="/mm.gguf",
+        )
+        assert engine.available() is False
+        assert spawn_calls["n"] == 0
+
+    def test_no_spawn_when_non_localhost(
+        self, mock_httpx: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        spawn_calls = {"n": 0}
+
+        def fake_ensure(*args: object, **kwargs: object) -> bool:
+            spawn_calls["n"] += 1
+            return True
+
+        from cc_vlm import server_manager
+
+        monkeypatch.setattr(server_manager, "ensure_running", fake_ensure)
+
+        engine = LlamaServerVLMEngine(
+            server_url="http://example.com:8080",
+            auto_spawn=True,
+            model_path="/m.gguf",
+            mmproj_path="/mm.gguf",
+        )
+        assert engine.available() is False
+        assert spawn_calls["n"] == 0
+
+    def test_no_spawn_when_model_path_empty(
+        self, mock_httpx: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        spawn_calls = {"n": 0}
+
+        def fake_ensure(*args: object, **kwargs: object) -> bool:
+            spawn_calls["n"] += 1
+            return True
+
+        from cc_vlm import server_manager
+
+        monkeypatch.setattr(server_manager, "ensure_running", fake_ensure)
+
+        engine = LlamaServerVLMEngine(
+            server_url="http://localhost:8080",
+            auto_spawn=True,
+            model_path="",
+            mmproj_path="",
+        )
+        assert engine.available() is False
+        assert spawn_calls["n"] == 0
+
+    def test_resolver_forwards_auto_spawn(
+        self, mock_httpx: MagicMock, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Explicit engine='llamaserver' should construct with the forwarded
+        auto_spawn / server_port / server_binary kwargs."""
+        engine = resolve_vlm_engine(
+            "llamaserver",
+            server_url="http://localhost:8080",
+            auto_spawn=True,
+            server_port=9090,
+            server_binary="/usr/local/bin/llama-server",
+        )
+        assert isinstance(engine, LlamaServerVLMEngine)
+        assert engine.auto_spawn is True
+        assert engine.server_port == 9090
+        assert engine.server_binary == "/usr/local/bin/llama-server"
