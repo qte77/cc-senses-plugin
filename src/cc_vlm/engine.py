@@ -74,7 +74,11 @@ class LlamaCppVLMEngine:
         n_ctx: int = 4096,
         n_gpu_layers: int = 0,
         max_tokens: int = 256,
+        **_kwargs: Any,
     ) -> None:
+        # Reason: `_kwargs` absorbs server_url/server_model_alias etc. that
+        # `resolve_vlm_engine` forwards uniformly to every engine in
+        # `_ENGINE_TYPES`. They're meaningless for the in-process backend.
         self.model_path = model_path
         self.mmproj_path = mmproj_path
         self.handler_name = handler_name
@@ -163,7 +167,112 @@ class LlamaCppVLMEngine:
         return content.strip()
 
 
-_ENGINE_TYPES: list[type[LlamaCppVLMEngine]] = [LlamaCppVLMEngine]
+class LlamaServerVLMEngine:
+    """HTTP VLM engine that talks to `llama-server` over its OpenAI-compatible API.
+
+    Routes around the `abetlen/llama-cpp-python` chat-handler gap (issue
+    #102 for Qwen3-VL, no SmolVLMChatHandler upstream) by reaching the
+    same `llama.cpp` binary via its HTTP server. The user starts the
+    server themselves (Phase 1); we POST chat completions to it.
+
+    The server keeps the model resident in RAM across `/see` invocations,
+    so this path is *actually* warm — unlike the in-process engine,
+    which reloads on every fresh Python process.
+    """
+
+    def __init__(
+        self,
+        server_url: str = "",
+        server_model_alias: str = "",
+        max_tokens: int = 256,
+        **_kwargs: Any,
+    ) -> None:
+        # Reason: `_kwargs` absorbs model_path/handler_name/etc. forwarded
+        # uniformly by `resolve_vlm_engine`. Those are meaningless for the
+        # HTTP backend.
+        self.server_url = server_url.rstrip("/")
+        self.server_model_alias = server_model_alias
+        self.max_tokens = max_tokens
+
+    @property
+    def name(self) -> str:
+        return "llamaserver"
+
+    def available(self) -> bool:
+        """Check whether llama-server is reachable on `server_url`.
+
+        Returns False on: empty `server_url`, missing `httpx`, non-200
+        health response, connect error, or timeout. Does NOT spawn a
+        server here — that's Phase 2.
+        """
+        if not self.server_url:
+            return False
+        try:
+            import httpx
+        except ImportError:
+            return False
+        try:
+            response = httpx.get(f"{self.server_url}/health", timeout=2.0)
+        except Exception:  # noqa: BLE001
+            # Reason: httpx raises various subclasses (ConnectError,
+            # TimeoutException, ReadTimeout, etc.). All of them mean
+            # "server not reachable" — catch broadly so available()
+            # never propagates a transport error to the caller.
+            return False
+        return response.status_code == 200
+
+    def describe(self, image_path: Path, prompt: str) -> str:
+        """Read the image, POST a chat-completion to llama-server, return text.
+
+        Image is base64-encoded into a data URL — llama-server's vision
+        endpoints don't accept `file://` for security, and base64 is
+        portable across all llama.cpp builds.
+        """
+        import base64
+
+        import httpx
+
+        image_bytes = image_path.read_bytes()
+        image_b64 = base64.b64encode(image_bytes).decode("ascii")
+        mime = "image/png" if image_path.suffix.lower() == ".png" else "image/jpeg"
+        data_url = f"data:{mime};base64,{image_b64}"
+
+        body: dict[str, Any] = {
+            "model": self.server_model_alias,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": data_url}},
+                    ],
+                },
+            ],
+            "max_tokens": self.max_tokens,
+        }
+        response = httpx.post(
+            f"{self.server_url}/v1/chat/completions",
+            json=body,
+            timeout=60.0,
+        )
+        if response.status_code != 200:
+            msg = f"llama-server returned {response.status_code}: {response.text}"
+            raise RuntimeError(msg)
+        data = response.json()
+        choices = data.get("choices", [])
+        if not choices:
+            msg = f"llama-server returned no choices: {data}"
+            raise RuntimeError(msg)
+        message = choices[0].get("message", {})
+        content = message.get("content")
+        if not isinstance(content, str):
+            msg = f"llama-server returned unexpected content shape: {message}"
+            raise RuntimeError(msg)
+        return content.strip()
+
+
+_VLMEngineType = type[LlamaCppVLMEngine] | type[LlamaServerVLMEngine]
+_ENGINE_TYPES: list[_VLMEngineType] = [LlamaCppVLMEngine, LlamaServerVLMEngine]
 
 
 def resolve_vlm_engine(
@@ -171,18 +280,22 @@ def resolve_vlm_engine(
     *,
     model_path: str = "",
     mmproj_path: str = "",
-    handler_name: str = "qwen2.5vl",
+    handler_name: str = "moondream",
     n_ctx: int = 4096,
     n_gpu_layers: int = 0,
     max_tokens: int = 256,
+    server_url: str = "",
+    server_model_alias: str = "",
 ) -> VLMEngine:
     """Resolve a VLM engine by name or auto-detect first available.
 
-    Auto-detect order: LlamaCppVLMEngine (only MVP engine). Future:
-    LlamaServerVLMEngine alternative, ClaudeVisionEngine fallback.
+    Auto-detect order: LlamaCppVLMEngine (in-process) first, then
+    LlamaServerVLMEngine (HTTP). The in-process backend wins when both
+    are configured because it doesn't depend on an external daemon.
     """
-    name_map: dict[str, type[LlamaCppVLMEngine]] = {
+    name_map: dict[str, _VLMEngineType] = {
         "llamacpp": LlamaCppVLMEngine,
+        "llamaserver": LlamaServerVLMEngine,
     }
 
     kwargs: dict[str, Any] = {
@@ -192,6 +305,8 @@ def resolve_vlm_engine(
         "n_ctx": n_ctx,
         "n_gpu_layers": n_gpu_layers,
         "max_tokens": max_tokens,
+        "server_url": server_url,
+        "server_model_alias": server_model_alias,
     }
 
     if engine_name != "auto":
@@ -215,13 +330,40 @@ def resolve_vlm_engine(
         "installation (downloads models, prints the matching "
         "llama-cpp-python install command for your hardware). Then set "
         "[vlm] model_path + mmproj_path in .cc-senses.toml or export "
-        "CC_VLM_MODEL_PATH and CC_VLM_MMPROJ_PATH."
+        "CC_VLM_MODEL_PATH and CC_VLM_MMPROJ_PATH. Alternatively, run "
+        "`llama-server` and set [vlm] server_url for the HTTP backend."
     )
     raise RuntimeError(msg)
 
 
-def _unavailable_message(engine: LlamaCppVLMEngine) -> str:
+def _unavailable_message(engine: LlamaCppVLMEngine | LlamaServerVLMEngine) -> str:
     """Diagnose why a specific engine is unavailable."""
+    if isinstance(engine, LlamaServerVLMEngine):
+        return _llamaserver_unavailable_message(engine)
+    return _llamacpp_unavailable_message(engine)
+
+
+def _llamaserver_unavailable_message(engine: LlamaServerVLMEngine) -> str:
+    try:
+        import httpx  # type: ignore[import-not-found]  # noqa: F401
+    except ImportError:
+        return (
+            "httpx not installed. Install the [see] extras: "
+            "`uv sync --extra see` — required for the llama-server backend."
+        )
+    if not engine.server_url:
+        return (
+            "No [vlm] server_url configured. Set in .cc-senses.toml or export "
+            "CC_VLM_SERVER_URL (e.g. http://localhost:8080)."
+        )
+    return (
+        f"llama-server unreachable at {engine.server_url}. "
+        "Start it with `llama-server -m model.gguf --mmproj mmproj.gguf --port 8080`, "
+        "or set [vlm] auto_spawn = true (Phase 2)."
+    )
+
+
+def _llamacpp_unavailable_message(engine: LlamaCppVLMEngine) -> str:
     try:
         import llama_cpp  # type: ignore[import-not-found]  # noqa: F401
     except ImportError:

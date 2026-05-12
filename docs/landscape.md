@@ -105,8 +105,12 @@ and the supported-handlers table for full details.
 | `minicpmv` | MiniCPM-V 2.6 | Apache 2.0 |
 | `nanollava` | NanoLLaVA | Apache 2.0 |
 
-All shipped via the single `LlamaCppVLMEngine` class in
-`src/cc_vlm/engine.py`, dispatched on `handler_name`.
+Shipped via two engine classes in `src/cc_vlm/engine.py`:
+
+- `LlamaCppVLMEngine` — in-process via llama-cpp-python (dispatched on `handler_name`).
+- `LlamaServerVLMEngine` — HTTP via llama-server (PR #107/#108; user-managed in Phase 1, lazy auto-spawn in Phase 2, SessionStart preload in Phase 3). Routes around the abetlen/llama-cpp-python handler gap and gives genuinely-warm-across-invocations latency, which the in-process backend cannot in the `/see` CLI workflow (each `/see` spawns a fresh Python process).
+
+**SmolVLM2-2.2B** and **Qwen3-VL-2B** are reachable today via the `llamaserver` engine — both are blocked on missing `*ChatHandler` classes in `abetlen/llama-cpp-python` (Qwen3-VL: upstream #2080; SmolVLM2: no handler upstream at all).
 
 ### Considered / deferred
 
@@ -114,11 +118,9 @@ To be filed as issues; placeholder list for now.
 
 | Candidate | Status | Notes |
 |---|---|---|
-| **`LlamaServerVLMEngine` HTTP backend** | deferred (Phase 2) | Same `llama.cpp` binary as the in-process path — adds an HTTP-server engine class so users can run any GGUF llama.cpp supports without waiting for `abetlen/llama-cpp-python` handler PRs. Unlocks SmolVLM2-2.2B and Qwen3-VL-2B on the day llama.cpp supports them. Ollama considered and rejected (extra daemon family, Ollama-as-dependency). |
-| **`Qwen3VLChatHandler` for in-process backend** | deferred (Phase 3) | Blocked on [`abetlen/llama-cpp-python` #2080](https://github.com/abetlen/llama-cpp-python/issues/2080). Add `"qwen3vl"` to `_HANDLER_MAP` once the upstream class lands. Until then, `LlamaServerVLMEngine` (above) is the unblock path. |
-| **`available()` hardening for handler-class-mismatch** | deferred | `engine.py:available()` only checks `handler_name in _HANDLER_MAP`, not whether the class actually exists in the installed `llama_cpp.llama_chat_format` module. Latent footgun for any new handler we add. |
+| **`Qwen3VLChatHandler` for in-process backend** | deferred (tracker #102) | Blocked on [`abetlen/llama-cpp-python` #2080](https://github.com/abetlen/llama-cpp-python/issues/2080). Add `"qwen3vl"` to `_HANDLER_MAP` once the upstream class lands. Until then, `LlamaServerVLMEngine` is the unblock path. |
+| **`available()` hardening for handler-class-mismatch** | deferred (tracker #103) | `engine.py:available()` only checks `handler_name in _HANDLER_MAP`, not whether the class actually exists in the installed `llama_cpp.llama_chat_format` module. Latent footgun for any new handler we add. |
 | **`ClaudeVisionEngine` fallback** | deferred (per ADR-0003 Tier 1) | Returns image path reference for Claude's built-in vision instead of running a local VLM. ~1,600 tokens/call (vs ~120 for local VLM). Opt-in `--vision` flag. |
-| **SmolVLM2-2.2B** | deferred via `LlamaServerVLMEngine` | Apache 2.0, ~1.1 GB Q4, designed for on-device CPU. No `SmolVLMChatHandler` in `abetlen/llama-cpp-python`; reachable today only via `llama-server`. |
 
 ### Rejected
 

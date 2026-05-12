@@ -10,7 +10,18 @@ from cc_voice_common.config import load_toml_section
 
 
 class VLMConfig(BaseSettings):
-    """VLM plugin configuration for the llama-cpp-python in-process engine."""
+    """VLM plugin configuration.
+
+    Covers both engines:
+    - `LlamaCppVLMEngine` (in-process): `model_path` + `mmproj_path` +
+      `handler_name` + `n_ctx`/`n_gpu_layers`/`max_tokens`.
+    - `LlamaServerVLMEngine` (HTTP): `server_url` + `server_model_alias`
+      + (Phase 2) `server_port`/`server_binary`/`auto_spawn` +
+      (Phase 3) `preload`.
+
+    `max_dimension`/`jpeg_quality`/`template`/`cache_size` apply to the
+    capture+inference pipeline regardless of which engine is selected.
+    """
 
     model_config = SettingsConfigDict(env_prefix="CC_VLM_", extra="ignore")
 
@@ -25,6 +36,14 @@ class VLMConfig(BaseSettings):
     jpeg_quality: int = 85
     template: str = "generic"
     cache_size: int = 32
+    # llama-server HTTP backend (Phase 1 wires server_url + alias;
+    # remaining fields are inert until Phase 2 lifecycle work lands).
+    server_url: str = ""
+    server_model_alias: str = ""
+    server_port: int = 8080
+    server_binary: str = "llama-server"
+    auto_spawn: bool = True
+    preload: bool = False
 
     @classmethod
     def settings_customise_sources(

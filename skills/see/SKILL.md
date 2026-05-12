@@ -21,6 +21,39 @@ make setup_see_qwen25    # alt: Qwen2.5-VL-3B (~1.6 GB Q4, richer output)
 
 Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-bridge/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) for the full `[vlm]` schema.
 
+## Engines
+
+Two engines are available; auto-detect picks the first one that's configured.
+
+| Engine | When to use | Tradeoff |
+|---|---|---|
+| `llamacpp` (in-process) | You have `model_path` + `mmproj_path` set and the appropriate `llama-cpp-python` chat handler exists for your model family | No daemon; reloads the model on every `/see` call (each invocation is a fresh Python process) |
+| `llamaserver` (HTTP) | You want a hot model across `/see` calls, or you're using SmolVLM2 / Qwen3-VL where the in-process handler doesn't exist yet | User runs `llama-server` separately; ~1-2 GB RAM while alive; warm response within 200-500 ms |
+
+### Using a llama-server backend (manual)
+
+For SmolVLM2-2.2B, Qwen3-VL-2B, or any GGUF llama.cpp supports but `llama-cpp-python` doesn't yet:
+
+1. Install `llama.cpp` and ensure `llama-server` is on your PATH.
+2. Start the server with your model + mmproj:
+
+   ```bash
+   llama-server -m /path/to/model.gguf --mmproj /path/to/mmproj.gguf --port 8080
+   ```
+
+3. Configure cc-senses-bridge to talk to it. Add to `.cc-senses.toml`:
+
+   ```toml
+   [vlm]
+   engine = "llamaserver"
+   server_url = "http://localhost:8080"
+   # server_model_alias is usually unused — llama-server accepts any name
+   ```
+
+4. Run `/see` as usual. The model stays resident in `llama-server` between invocations, so latency stays around the inference cost (~200-500 ms) instead of paying the 3-5 s model load on every call.
+
+> **Note**: Phase 1 ships manual server management only. Lazy auto-spawn (`auto_spawn = true`) and SessionStart preload (`preload = true`) land in subsequent PRs.
+
 ## Usage
 
 - `/see` — capture full screen, describe using the configured template (default: `generic`)
