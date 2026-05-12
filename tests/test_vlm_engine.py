@@ -14,7 +14,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from cc_vlm.engine import LlamaCppVLMEngine, VLMEngine, resolve_vlm_engine
+from cc_vlm.engine import (
+    LlamaCppVLMEngine,
+    LlamaServerVLMEngine,
+    VLMEngine,
+    resolve_vlm_engine,
+)
 
 
 @pytest.fixture
@@ -415,3 +420,259 @@ class TestResolveVLMEngine:
         finally:
             if saved is not None:
                 sys.modules["llama_cpp"] = saved
+
+
+@pytest.fixture
+def mock_httpx() -> MagicMock:
+    """Install a fake httpx module into sys.modules.
+
+    Returns the fake httpx MagicMock. Tests configure `.get.return_value`
+    and `.post.return_value` (or `.side_effect`) to drive engine behavior.
+    `fake_httpx.ConnectError` and `.TimeoutException` are wired to real
+    exception classes so engines can catch them by type.
+    """
+    fake = MagicMock()
+
+    class FakeConnectError(Exception):
+        pass
+
+    class FakeTimeoutError(Exception):
+        pass
+
+    fake.ConnectError = FakeConnectError
+    fake.TimeoutException = FakeTimeoutError
+
+    default_response = MagicMock()
+    default_response.status_code = 200
+    default_response.text = "OK"
+    default_response.json.return_value = {
+        "choices": [{"message": {"role": "assistant", "content": "A terminal showing git status."}}]
+    }
+    fake.get.return_value = default_response
+    fake.post.return_value = default_response
+
+    saved = sys.modules.get("httpx")
+    sys.modules["httpx"] = fake
+    yield fake
+    if saved is None:
+        sys.modules.pop("httpx", None)
+    else:
+        sys.modules["httpx"] = saved
+
+
+class TestLlamaServerVLMEngineDefaults:
+    def test_name(self) -> None:
+        assert LlamaServerVLMEngine().name == "llamaserver"
+
+    def test_defaults(self) -> None:
+        engine = LlamaServerVLMEngine()
+        assert engine.server_url == ""
+        assert engine.server_model_alias == ""
+        assert engine.max_tokens == 256
+
+    def test_strips_trailing_slash_from_url(self) -> None:
+        engine = LlamaServerVLMEngine(server_url="http://localhost:8080/")
+        assert engine.server_url == "http://localhost:8080"
+
+    def test_accepts_and_ignores_irrelevant_kwargs(self) -> None:
+        """Forwarded kwargs from resolve_vlm_engine for the in-process engine
+        must not break the HTTP engine's constructor."""
+        engine = LlamaServerVLMEngine(
+            server_url="http://localhost:8080",
+            model_path="/ignored.gguf",
+            mmproj_path="/ignored-mm.gguf",
+            handler_name="moondream",
+            n_ctx=4096,
+            n_gpu_layers=0,
+        )
+        assert engine.server_url == "http://localhost:8080"
+
+
+class TestLlamaServerVLMEngineAvailable:
+    def test_unavailable_when_server_url_empty(self) -> None:
+        engine = LlamaServerVLMEngine(server_url="")
+        assert engine.available() is False
+
+    def test_unavailable_when_httpx_missing(self) -> None:
+        """Without httpx installed, available() returns False (no crash)."""
+        saved = sys.modules.pop("httpx", None)
+        sys.modules["httpx"] = None  # type: ignore[assignment]
+        try:
+            engine = LlamaServerVLMEngine(server_url="http://localhost:8080")
+            assert engine.available() is False
+        finally:
+            sys.modules.pop("httpx", None)
+            if saved is not None:
+                sys.modules["httpx"] = saved
+
+    def test_available_when_health_200(self, mock_httpx: MagicMock) -> None:
+        engine = LlamaServerVLMEngine(server_url="http://localhost:8080")
+        assert engine.available() is True
+        mock_httpx.get.assert_called_once()
+        called_url = mock_httpx.get.call_args.args[0]
+        assert called_url == "http://localhost:8080/health"
+
+    def test_unavailable_when_health_503(self, mock_httpx: MagicMock) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        engine = LlamaServerVLMEngine(server_url="http://localhost:8080")
+        assert engine.available() is False
+
+    def test_unavailable_on_connect_error(self, mock_httpx: MagicMock) -> None:
+        mock_httpx.get.side_effect = mock_httpx.ConnectError("refused")
+        engine = LlamaServerVLMEngine(server_url="http://localhost:8080")
+        assert engine.available() is False
+
+    def test_unavailable_on_timeout(self, mock_httpx: MagicMock) -> None:
+        mock_httpx.get.side_effect = mock_httpx.TimeoutException("timeout")
+        engine = LlamaServerVLMEngine(server_url="http://localhost:8080")
+        assert engine.available() is False
+
+
+class TestLlamaServerVLMEngineDescribe:
+    @pytest.fixture
+    def engine(self) -> LlamaServerVLMEngine:
+        return LlamaServerVLMEngine(
+            server_url="http://localhost:8080",
+            server_model_alias="smolvlm2",
+            max_tokens=128,
+        )
+
+    def test_describe_returns_stripped_content(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        mock_httpx.post.return_value.json.return_value = {
+            "choices": [{"message": {"content": "  trimmed.  \n"}}]
+        }
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"\xff\xd8fake")
+
+        result = engine.describe(img, "what is this")
+
+        assert result == "trimmed."
+
+    def test_describe_posts_to_chat_completions(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"\xff\xd8fake")
+        engine.describe(img, "prompt")
+
+        called_url = mock_httpx.post.call_args.args[0]
+        assert called_url == "http://localhost:8080/v1/chat/completions"
+
+    def test_describe_body_has_model_and_base64_image(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"\xff\xd8fake")
+        engine.describe(img, "what is this")
+
+        body = mock_httpx.post.call_args.kwargs["json"]
+        assert body["model"] == "smolvlm2"
+        assert body["max_tokens"] == 128
+        content = body["messages"][0]["content"]
+        text_items = [c for c in content if c.get("type") == "text"]
+        image_items = [c for c in content if c.get("type") == "image_url"]
+        assert text_items[0]["text"] == "what is this"
+        url = image_items[0]["image_url"]["url"]
+        assert url.startswith("data:image/jpeg;base64,")
+        # The encoded payload should round-trip to the original bytes
+        import base64
+
+        b64 = url.split(",", 1)[1]
+        assert base64.b64decode(b64) == b"\xff\xd8fake"
+
+    def test_describe_detects_png_mime(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        img = tmp_path / "x.png"
+        img.write_bytes(b"\x89PNGfake")
+        engine.describe(img, "p")
+
+        body = mock_httpx.post.call_args.kwargs["json"]
+        url = body["messages"][0]["content"][1]["image_url"]["url"]
+        assert url.startswith("data:image/png;base64,")
+
+    def test_describe_raises_on_503(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        bad.text = "server overloaded"
+        mock_httpx.post.return_value = bad
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"x")
+
+        with pytest.raises(RuntimeError, match="503"):
+            engine.describe(img, "p")
+
+    def test_describe_raises_on_no_choices(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        mock_httpx.post.return_value.json.return_value = {"choices": []}
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"x")
+
+        with pytest.raises(RuntimeError, match="no choices"):
+            engine.describe(img, "p")
+
+    def test_describe_raises_on_malformed_content(
+        self, engine: LlamaServerVLMEngine, mock_httpx: MagicMock, tmp_path: Path
+    ) -> None:
+        mock_httpx.post.return_value.json.return_value = {
+            "choices": [{"message": {"content": ["unexpected", "list"]}}]
+        }
+        img = tmp_path / "x.jpg"
+        img.write_bytes(b"x")
+
+        with pytest.raises(RuntimeError, match="unexpected content shape"):
+            engine.describe(img, "p")
+
+
+class TestResolveVLMEngineWithLlamaServer:
+    def test_explicit_llamaserver_resolves(self, mock_httpx: MagicMock) -> None:
+        engine = resolve_vlm_engine("llamaserver", server_url="http://localhost:8080")
+        assert isinstance(engine, LlamaServerVLMEngine)
+
+    def test_explicit_llamaserver_unavailable_raises(self, mock_httpx: MagicMock) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        with pytest.raises(RuntimeError, match="unreachable"):
+            resolve_vlm_engine("llamaserver", server_url="http://localhost:8080")
+
+    def test_auto_falls_back_to_llamaserver_when_only_server_set(
+        self, mock_httpx: MagicMock
+    ) -> None:
+        """If model_path is empty but server_url is set and reachable, HTTP engine wins."""
+        engine = resolve_vlm_engine("auto", server_url="http://localhost:8080")
+        assert isinstance(engine, LlamaServerVLMEngine)
+
+    def test_auto_prefers_llamacpp_when_both_configured(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+        mock_httpx: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """In-process wins over HTTP when both are available (priority order)."""
+        model = tmp_path / "m.gguf"
+        mmproj = tmp_path / "mm.gguf"
+        model.write_bytes(b"x")
+        mmproj.write_bytes(b"x")
+        engine = resolve_vlm_engine(
+            "auto",
+            model_path=str(model),
+            mmproj_path=str(mmproj),
+            server_url="http://localhost:8080",
+        )
+        assert isinstance(engine, LlamaCppVLMEngine)
+
+    def test_unavailable_message_mentions_url(self, mock_httpx: MagicMock) -> None:
+        bad = MagicMock()
+        bad.status_code = 503
+        mock_httpx.get.return_value = bad
+        with pytest.raises(RuntimeError) as exc_info:
+            resolve_vlm_engine("llamaserver", server_url="http://localhost:9999")
+        assert "http://localhost:9999" in str(exc_info.value)

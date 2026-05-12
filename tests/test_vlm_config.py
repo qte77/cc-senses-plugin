@@ -24,6 +24,18 @@ class TestVLMConfigDefaults:
         assert config.template == "generic"
         assert config.cache_size == 32
 
+    def test_llama_server_field_defaults(self) -> None:
+        """Phase 1 introduces six llama-server fields; Phase 1 wires server_url
+        and server_model_alias; the remaining four land as inert fields ready
+        for Phase 2/3 lifecycle work."""
+        config = VLMConfig()
+        assert config.server_url == ""
+        assert config.server_model_alias == ""
+        assert config.server_port == 8080
+        assert config.server_binary == "llama-server"
+        assert config.auto_spawn is True
+        assert config.preload is False
+
 
 class TestEnvOverrides:
     @pytest.fixture(autouse=True)
@@ -79,6 +91,22 @@ class TestEnvOverrides:
     def test_env_missing_leaves_defaults(self) -> None:
         config = VLMConfig()
         assert config.engine == "auto"
+
+    def test_server_url_env_override(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("CC_VLM_SERVER_URL", "http://localhost:8080")
+        monkeypatch.setenv("CC_VLM_SERVER_MODEL_ALIAS", "smolvlm2")
+        config = VLMConfig()
+        assert config.server_url == "http://localhost:8080"
+        assert config.server_model_alias == "smolvlm2"
+
+    def test_server_port_env_override(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("CC_VLM_SERVER_PORT", "9090")
+        monkeypatch.setenv("CC_VLM_AUTO_SPAWN", "false")
+        monkeypatch.setenv("CC_VLM_PRELOAD", "true")
+        config = VLMConfig()
+        assert config.server_port == 9090
+        assert config.auto_spawn is False
+        assert config.preload is True
 
 
 class TestLoadVLMConfig:

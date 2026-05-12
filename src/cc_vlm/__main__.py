@@ -125,6 +125,8 @@ def main(argv: list[str] | None = None) -> int:
             n_ctx=config.n_ctx,
             n_gpu_layers=config.n_gpu_layers,
             max_tokens=config.max_tokens,
+            server_url=config.server_url,
+            server_model_alias=config.server_model_alias,
         )
     except (RuntimeError, ValueError) as exc:
         print(f"cc_vlm: {exc}", file=sys.stderr)

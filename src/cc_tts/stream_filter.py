@@ -56,7 +56,6 @@ class StreamFilter:
         clean = re.sub(r"[^\n]*\r", "", clean)
 
         for line in clean.split("\n"):
-
             # Code block toggle
             stripped = line.strip()
             if stripped.startswith("```"):

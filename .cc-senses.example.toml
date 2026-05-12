@@ -29,9 +29,11 @@ max_words = 200              # Hard word cap on transcriptions
 # VLM settings (env overrides: CC_VLM_ENGINE, CC_VLM_MODEL_PATH,
 # CC_VLM_MMPROJ_PATH, CC_VLM_HANDLER_NAME, CC_VLM_N_CTX,
 # CC_VLM_N_GPU_LAYERS, CC_VLM_MAX_TOKENS, CC_VLM_MAX_DIMENSION,
-# CC_VLM_JPEG_QUALITY, CC_VLM_TEMPLATE, CC_VLM_CACHE_SIZE)
+# CC_VLM_JPEG_QUALITY, CC_VLM_TEMPLATE, CC_VLM_CACHE_SIZE,
+# CC_VLM_SERVER_URL, CC_VLM_SERVER_MODEL_ALIAS, CC_VLM_SERVER_PORT,
+# CC_VLM_SERVER_BINARY, CC_VLM_AUTO_SPAWN, CC_VLM_PRELOAD)
 [vlm]
-engine = "auto"              # "auto" | "llamacpp"
+engine = "auto"              # "auto" | "llamacpp" | "llamaserver"
 model_path = ""              # Absolute path to .gguf vision model (set by `make setup_see`)
 mmproj_path = ""             # Absolute path to mmproj (CLIP projector) .gguf
 handler_name = "moondream"   # Default: Moondream2 (~0.9 GB Q4, fastest CPU path)
@@ -44,3 +46,15 @@ max_dimension = 768          # Resize longest edge before VLM (tokens ∝ dimens
 jpeg_quality = 85
 template = "generic"         # Default template if --template not passed
 cache_size = 32              # Per-invocation LRU entries
+
+# llama-server HTTP backend (alternative to llama-cpp-python in-process).
+# Routes around the llama-cpp-python chat-handler gap (Qwen3-VL, SmolVLM2).
+# Phase 1 wires server_url + server_model_alias; lifecycle fields below
+# (server_port / server_binary / auto_spawn / preload) are inert until
+# Phase 2 / Phase 3 land.
+server_url = ""              # e.g. "http://localhost:8080" — empty disables the HTTP engine
+server_model_alias = ""      # OpenAI-style model name; usually unused — llama-server accepts any
+server_port = 8080           # Used by Phase 2 auto-spawn
+server_binary = "llama-server"  # PATH lookup or absolute path
+auto_spawn = true            # (Phase 2) lazy spawn on first /see if no reachable server
+preload = false              # (Phase 3) SessionStart hook spawns server eagerly
