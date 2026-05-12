@@ -76,7 +76,7 @@ def main() -> None:
     if len(sys.argv) < 2 or "--help" in sys.argv or "-h" in sys.argv:
         print("Usage: cc-tts-stream [--speed <float>] <prompt>")
         print("  Sends prompt to Claude, speaks the response via TTS.")
-        print("  --speed  Override TTS speed (default: from .cc-voice.toml)")
+        print("  --speed  Override TTS speed (default: from .cc-senses.toml)")
         sys.exit(0 if "--help" in sys.argv or "-h" in sys.argv else 1)
 
     if shutil.which("claude") is None:

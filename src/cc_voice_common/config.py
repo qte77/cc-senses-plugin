@@ -1,4 +1,4 @@
-"""Shared config utilities — TOML discovery and section loading for cc-voice plugins."""
+"""Shared config utilities — TOML discovery and section loading for cc-senses-bridge plugins."""
 
 from __future__ import annotations
 
@@ -6,11 +6,11 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-CONFIG_FILENAMES = [".cc-voice.toml"]
+CONFIG_FILENAMES = [".cc-senses.toml"]
 
 
 def find_config_file() -> Path | None:
-    """Walk up from cwd to find .cc-voice.toml."""
+    """Walk up from cwd to find .cc-senses.toml."""
     current = Path.cwd()
     for directory in [current, *current.parents]:
         for filename in CONFIG_FILENAMES:
@@ -21,7 +21,7 @@ def find_config_file() -> Path | None:
 
 
 def load_toml_section(section: str) -> dict[str, Any]:
-    """Load a section from .cc-voice.toml, returning {} if not found."""
+    """Load a section from .cc-senses.toml, returning {} if not found."""
     config_file = find_config_file()
     if config_file is None:
         return {}

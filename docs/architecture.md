@@ -1,13 +1,13 @@
 # Architecture
 
-Single source of truth for cc-voice pipeline and engine details.
+Single source of truth for cc-senses-bridge pipeline and engine details.
 ADRs in `docs/adr/` record decisions; this file records the current design.
 
 ---
 
 ## Overview
 
-cc-voice adds three subsystems to Claude Code:
+cc-senses-bridge adds three subsystems to Claude Code:
 
 | Subsystem | Command | Role |
 |---|---|---|

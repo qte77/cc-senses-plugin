@@ -1,7 +1,7 @@
 """Stop hook handler for auto-read mode.
 
 This hook fires on EVERY Claude response (registered as a Stop hook in
-hooks/hooks.json via the cc-voice plugin). It is intentionally always-registered rather than
+hooks/hooks.json via the cc-senses-bridge plugin). It is intentionally always-registered rather than
 dynamically added/removed because CC hooks don't hot-reload — they require
 a session restart to take effect.
 
@@ -31,9 +31,9 @@ from pathlib import Path
 
 from cc_tts.config import load_config
 
-# Debug log path: ~/.cache/cc-voice/hook.log
+# Debug log path: ~/.cache/cc-senses-bridge/hook.log
 # Set CC_TTS_HOOK_DEBUG=1 to enable; disabled by default.
-_LOG_PATH = Path.home() / ".cache" / "cc-voice" / "hook.log"
+_LOG_PATH = Path.home() / ".cache" / "cc-senses-bridge" / "hook.log"
 
 
 def extract_assistant_text(stdin_data: str) -> str:
@@ -65,7 +65,7 @@ def main() -> None:
     child synthesizes and plays in background.
 
     Graceful no-op when deps are missing (team members without TTS setup).
-    Set CC_TTS_HOOK_DEBUG=1 to log diagnostics to ~/.cache/cc-voice/hook.log.
+    Set CC_TTS_HOOK_DEBUG=1 to log diagnostics to ~/.cache/cc-senses-bridge/hook.log.
     """
     _debug("hook fired")
 

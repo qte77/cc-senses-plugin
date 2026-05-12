@@ -1,4 +1,4 @@
-"""Configuration loading from .cc-voice.toml [vlm] section and environment variables."""
+"""Configuration loading from .cc-senses.toml [vlm] section and environment variables."""
 
 from __future__ import annotations
 
@@ -41,5 +41,5 @@ class VLMConfig(BaseSettings):
 
 
 def load_vlm_config() -> VLMConfig:
-    """Load VLM config from [vlm] section of .cc-voice.toml with env var overrides."""
+    """Load VLM config from [vlm] section of .cc-senses.toml with env var overrides."""
     return VLMConfig(**load_toml_section("vlm"))

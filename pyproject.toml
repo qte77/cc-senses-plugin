@@ -1,7 +1,7 @@
 [project]
-name = "cc-voice"
-version = "0.7.0"
-description = "End-to-end voice plugin for Claude Code — TTS output and STT input"
+name = "cc-senses-bridge"
+version = "0.8.0"
+description = "Local multimodal I/O bridge for Claude Code — TTS (/speak), STT (/listen), VLM (/see)"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 authors = [{ name = "qte77" }]
@@ -17,10 +17,10 @@ see = ["mss>=9.0.0", "Pillow>=10.0.0", "blake3>=0.4.0"]
 # ROCm), typically via abetlen's prebuilt wheel indexes. See
 # `make setup_see` output and skills/see/SKILL.md for install guidance.
 all = [
-    "cc-voice[piper]",
-    "cc-voice[edge]",
-    "cc-voice[stt]",
-    "cc-voice[see]",
+    "cc-senses-bridge[piper]",
+    "cc-senses-bridge[edge]",
+    "cc-senses-bridge[stt]",
+    "cc-senses-bridge[see]",
 ]
 dev = ["ruff>=0.15.10", "pyright>=1.1.408", "bump-my-version>=1.3.0"]
 test = ["pytest>=9.0.3", "pytest-cov>=6.0"]
@@ -94,7 +94,7 @@ exclude_lines = [
 
 
 [tool.bumpversion]
-current_version = "0.7.0"
+current_version = "0.8.0"
 commit = true
 tag = true
 tag_name = "v{new_version}"

@@ -93,7 +93,7 @@ class TestLoadVLMConfig:
     def test_loads_from_vlm_toml_section(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        (tmp_path / ".cc-voice.toml").write_text(
+        (tmp_path / ".cc-senses.toml").write_text(
             "[vlm]\n"
             'engine = "llamacpp"\n'
             'model_path = "/models/qwen.gguf"\n'
@@ -110,7 +110,7 @@ class TestLoadVLMConfig:
         assert config.max_dimension == 512
 
     def test_env_overrides_toml(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        (tmp_path / ".cc-voice.toml").write_text('[vlm]\nmodel_path = "/toml/path.gguf"\n')
+        (tmp_path / ".cc-senses.toml").write_text('[vlm]\nmodel_path = "/toml/path.gguf"\n')
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("CC_VLM_MODEL_PATH", "/env/path.gguf")
         config = load_vlm_config()
@@ -119,7 +119,7 @@ class TestLoadVLMConfig:
     def test_ignores_unknown_vlm_keys(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        (tmp_path / ".cc-voice.toml").write_text(
+        (tmp_path / ".cc-senses.toml").write_text(
             '[vlm]\nengine = "llamacpp"\nunknown_field = "should_be_dropped"\n'
         )
         monkeypatch.chdir(tmp_path)

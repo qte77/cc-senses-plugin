@@ -27,11 +27,11 @@ class TestSTTConfigDefaults:
 
 
 class TestLoadSTTConfigFromToml:
-    def test_loads_from_cc_voice_toml_stt_section(
+    def test_loads_from_cc_senses_toml_stt_section(
         self, tmp_path: Path, monkeypatch: object
     ) -> None:
         toml_content = b'[stt]\nengine = "moonshine"\nlanguage = "de"\n'
-        config_file = tmp_path / ".cc-voice.toml"
+        config_file = tmp_path / ".cc-senses.toml"
         config_file.write_bytes(toml_content)
         monkeypatch.chdir(tmp_path)  # type: ignore[union-attr]
         config = load_stt_config()
@@ -47,7 +47,7 @@ class TestLoadSTTConfigFromToml:
         self, tmp_path: Path, monkeypatch: object
     ) -> None:
         toml_content = b'[tts]\nengine = "piper"\n'
-        config_file = tmp_path / ".cc-voice.toml"
+        config_file = tmp_path / ".cc-senses.toml"
         config_file.write_bytes(toml_content)
         monkeypatch.chdir(tmp_path)  # type: ignore[union-attr]
         config = load_stt_config()
@@ -57,7 +57,7 @@ class TestLoadSTTConfigFromToml:
 class TestSTTEnvOverrides:
     def test_env_overrides_toml(self, tmp_path: Path, monkeypatch: object) -> None:
         toml_content = b'[stt]\nengine = "moonshine"\n'
-        config_file = tmp_path / ".cc-voice.toml"
+        config_file = tmp_path / ".cc-senses.toml"
         config_file.write_bytes(toml_content)
         monkeypatch.chdir(tmp_path)  # type: ignore[union-attr]
         monkeypatch.setenv("CC_STT_ENGINE", "vosk")  # type: ignore[union-attr]

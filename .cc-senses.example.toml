@@ -1,5 +1,5 @@
-# CC-Voice configuration
-# Copy to .cc-voice.toml and adjust as needed.
+# cc-senses-bridge configuration
+# Copy to .cc-senses.toml and adjust as needed.
 #
 # Handler-name values for [vlm] are listed in docs/architecture.md.
 

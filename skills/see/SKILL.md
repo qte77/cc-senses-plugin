@@ -19,7 +19,7 @@ make setup_see           # default: Moondream2 (~0.9 GB Q4, fastest CPU)
 make setup_see_qwen25    # alt: Qwen2.5-VL-3B (~1.6 GB Q4, richer output)
 ```
 
-Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-voice/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-voice.toml`. See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) for the full `[vlm]` schema.
+Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-bridge/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) for the full `[vlm]` schema.
 
 ## Usage
 
@@ -51,7 +51,7 @@ make smoke                           # imports + --help + full test suite
 
 ```bash
 make plugin_validate                 # sanity-check the manifest first
-make plugin_install_local            # registers local marketplace + installs cc-voice (project scope)
+make plugin_install_local            # registers local marketplace + installs cc-senses-bridge (project scope)
 make run_cc                          # starts claude; then type /see in the session
 make plugin_uninstall                # removes plugin + marketplace when done
 ```
@@ -64,7 +64,7 @@ python -m cc_vlm $ARGUMENTS
 
 ## Configuration
 
-See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[vlm]` section for the full schema and `CC_VLM_*` env overrides. Supported `handler_name` values are listed in [`docs/architecture.md`](../../docs/architecture.md#supported-vlm-models-llama-cpp-python-handlers).
+See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) `[vlm]` section for the full schema and `CC_VLM_*` env overrides. Supported `handler_name` values are listed in [`docs/architecture.md`](../../docs/architecture.md#supported-vlm-models-llama-cpp-python-handlers).
 
 ## Token budget and rationale
 
@@ -80,7 +80,7 @@ For an end-to-end user flow (feeding screen content to Claude so it can debug or
 |---|---|
 | Per-session cache (in-memory `DescribeCache`) | Exits with the Python process. Nothing to clean. |
 | Temp JPEGs (`/tmp/tmp*.jpg`) | `make clean_see_artifacts` |
-| Downloaded GGUF + mmproj (`~/.cache/cc-voice/models/`) | `make clean_models` |
+| Downloaded GGUF + mmproj (`~/.cache/cc-senses-bridge/models/`) | `make clean_models` |
 | Python venv + pytest/ruff caches | `make clean` |
 | All of the above at once | `make clean_all` |
 | Plugin installation (if done via `make plugin_install_local`) | `make plugin_uninstall` |

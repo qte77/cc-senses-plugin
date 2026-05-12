@@ -214,7 +214,7 @@ def resolve_vlm_engine(
         "No VLM engine available. Run `make setup_see` for guided "
         "installation (downloads models, prints the matching "
         "llama-cpp-python install command for your hardware). Then set "
-        "[vlm] model_path + mmproj_path in .cc-voice.toml or export "
+        "[vlm] model_path + mmproj_path in .cc-senses.toml or export "
         "CC_VLM_MODEL_PATH and CC_VLM_MMPROJ_PATH."
     )
     raise RuntimeError(msg)
@@ -230,12 +230,12 @@ def _unavailable_message(engine: LlamaCppVLMEngine) -> str:
             "hardware — see `make setup_see` output or skills/see/SKILL.md."
         )
     if not engine.model_path:
-        return "No [vlm] model_path configured. Set in .cc-voice.toml or export CC_VLM_MODEL_PATH."
+        return "No [vlm] model_path configured. Set in .cc-senses.toml or export CC_VLM_MODEL_PATH."
     if not Path(engine.model_path).exists():
         return f"VLM model file not found: {engine.model_path}"
     if not engine.mmproj_path:
         return (
-            "No [vlm] mmproj_path configured. Set in .cc-voice.toml or export CC_VLM_MMPROJ_PATH."
+            "No [vlm] mmproj_path configured. Set in .cc-senses.toml or export CC_VLM_MMPROJ_PATH."
         )
     if not Path(engine.mmproj_path).exists():
         return f"VLM mmproj file not found: {engine.mmproj_path}"

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-05-12
+
+### Changed
+
+- chore: rename project `cc-voice` → `cc-senses-bridge` to reflect multimodal scope (TTS + STT + VLM). Config file renamed `.cc-voice.toml` → `.cc-senses.toml`; cache directory `~/.cache/cc-voice/` → `~/.cache/cc-senses-bridge/`; plugin slug renamed across `plugin.json`, `marketplace.json`, install commands, and docs. Python module names (`cc_tts`, `cc_stt`, `cc_vlm`, `cc_voice_common`) kept as-is to avoid import churn.
+
+### Migration notes
+
+- Move existing `.cc-voice.toml` to `.cc-senses.toml`
+- Move cached VLM models from `~/.cache/cc-voice/models/` to `~/.cache/cc-senses-bridge/models/`, or re-run `make setup_see`
+- Reinstall plugin: `make plugin_uninstall && make plugin_install_local`
+
 ## [0.7.0] - 2026-05-08
 
 ### Added

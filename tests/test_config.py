@@ -24,7 +24,7 @@ class TestLoadConfigFromToml:
 
         mp = pytest.MonkeyPatch()  # noqa: F841
         toml_content = b'[tts]\nengine = "espeak"\nvoice = "en_GB-alan"\nspeed = 1.5\n'
-        config_file = tmp_path / ".cc-voice.toml"
+        config_file = tmp_path / ".cc-senses.toml"
         config_file.write_bytes(toml_content)
         monkeypatch.chdir(tmp_path)  # type: ignore[union-attr]
         config = load_config()
@@ -41,7 +41,7 @@ class TestLoadConfigFromToml:
 class TestEnvOverrides:
     def test_env_overrides_toml(self, tmp_path: Path, monkeypatch: object) -> None:
         toml_content = b'[tts]\nengine = "espeak"\n'
-        config_file = tmp_path / ".cc-voice.toml"
+        config_file = tmp_path / ".cc-senses.toml"
         config_file.write_bytes(toml_content)
         monkeypatch.chdir(tmp_path)  # type: ignore[union-attr]
         monkeypatch.setenv("CC_TTS_ENGINE", "piper")  # type: ignore[union-attr]

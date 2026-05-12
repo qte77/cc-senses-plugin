@@ -1,7 +1,7 @@
 {
-  "name": "cc-voice",
-  "version": "0.7.0",
-  "description": "End-to-end voice for Claude Code. TTS output via /speak, STT input via /listen.",
+  "name": "cc-senses-bridge",
+  "version": "0.8.0",
+  "description": "Local multimodal I/O bridge for Claude Code — TTS (/speak), STT (/listen), VLM (/see).",
   "author": {
     "name": "qte77"
   }

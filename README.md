@@ -1,15 +1,15 @@
-# cc-voice (prototype)
+# cc-senses-bridge
 
-> **Status: Prototype** — end-to-end voice for Claude Code. TTS output via PTY proxy, STT input module scaffolded (config, engine, mic, VAD, PTY injection). Not production-ready.
+> Local multimodal I/O bridge for Claude Code — TTS output via `/speak`, STT input via `/listen`, screen-vision via `/see`.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-58f4c2.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.7.0-58f4c2.svg)
-[![CodeQL](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/codeql.yaml)
-[![CodeFactor](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype/badge)](https://www.codefactor.io/repository/github/qte77/cc-voice-plugin-prototype)
-[![Dependabot](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/dependabot/dependabot-updates)
-[![Lint MD and Links](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/cc-voice-plugin-prototype/actions/workflows/lint-md-links.yml)
+![Version](https://img.shields.io/badge/version-0.8.0-58f4c2.svg)
+[![CodeQL](https://github.com/qte77/cc-senses-bridge/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/cc-senses-bridge/actions/workflows/codeql.yaml)
+[![CodeFactor](https://www.codefactor.io/repository/github/qte77/cc-senses-bridge/badge)](https://www.codefactor.io/repository/github/qte77/cc-senses-bridge)
+[![Dependabot](https://github.com/qte77/cc-senses-bridge/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/qte77/cc-senses-bridge/actions/workflows/dependabot/dependabot-updates)
+[![Lint MD and Links](https://github.com/qte77/cc-senses-bridge/actions/workflows/lint-md-links.yml/badge.svg)](https://github.com/qte77/cc-senses-bridge/actions/workflows/lint-md-links.yml)
 
-End-to-end voice plugin for Claude Code. TTS speaks Claude's responses aloud, STT captures voice input via Moonshine/Vosk, VLM ingests the screen and feeds it as text into Claude's context for Claude to act on.
+Local multimodal I/O for Claude Code. TTS speaks Claude's responses aloud, STT captures voice input via Moonshine/Vosk, VLM ingests the screen and feeds it as text into Claude's context for Claude to act on.
 
 ## Features
 
@@ -31,7 +31,7 @@ Session summary generated with three engines for comparison:
 
 ```bash
 make setup_dev      # install package + dev deps
-make setup_tts      # install espeak-ng + mpv (zero-config baseline)
+make setup_espeak   # install espeak-ng + mpv (zero-config baseline)
 make setup_piper    # install Piper (neural)
 make setup_kokoro   # install Kokoro (best local)
 
@@ -41,19 +41,19 @@ cc-tts "Hello"      # one-shot CLI
 
 ## Configuration
 
-Copy [`.cc-voice.example.toml`](.cc-voice.example.toml) to `.cc-voice.toml` and edit. All TTS, STT, and VLM fields plus `CC_*` env-var overrides are documented inline.
+Copy [`.cc-senses.example.toml`](.cc-senses.example.toml) to `.cc-senses.toml` and edit. All TTS, STT, and VLM fields plus `CC_*` env-var overrides are documented inline.
 
 ## CC Plugin
 
 ```bash
-claude plugin install cc-voice@local
+claude plugin install cc-senses-bridge@cc-senses-bridge
 ```
 
 Provides `/speak`, `/listen`, `/see` skills and Stop-hook auto-read.
 
 ## Documentation
 
-- [`.cc-voice.example.toml`](.cc-voice.example.toml) — config schema and env vars
+- [`.cc-senses.example.toml`](.cc-senses.example.toml) — config schema and env vars
 - [Architecture](docs/architecture.md) — pipelines, engines, diagrams, token budgets
 - [User flows](docs/UserStory.md) — personas and end-to-end use cases (incl. hotkey-stop playback)
 - [ADRs](docs/adr/) — decision records (TTS modes, STT engines, VLM screen-sharing)

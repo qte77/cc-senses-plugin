@@ -47,4 +47,4 @@ def _speak_batch(speak: Callable[[str], None], batch: list[str]) -> None:
     try:
         speak(text)
     except Exception as exc:
-        print(f"[cc-voice] TTS error: {exc}", file=sys.stderr)
+        print(f"[cc-senses-bridge] TTS error: {exc}", file=sys.stderr)
