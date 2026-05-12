@@ -436,19 +436,17 @@ def mock_httpx() -> MagicMock:
     class FakeConnectError(Exception):
         pass
 
-    class FakeTimeoutException(Exception):
+    class FakeTimeoutError(Exception):
         pass
 
     fake.ConnectError = FakeConnectError
-    fake.TimeoutException = FakeTimeoutException
+    fake.TimeoutException = FakeTimeoutError
 
     default_response = MagicMock()
     default_response.status_code = 200
     default_response.text = "OK"
     default_response.json.return_value = {
-        "choices": [
-            {"message": {"role": "assistant", "content": "A terminal showing git status."}}
-        ]
+        "choices": [{"message": {"role": "assistant", "content": "A terminal showing git status."}}]
     }
     fake.get.return_value = default_response
     fake.post.return_value = default_response

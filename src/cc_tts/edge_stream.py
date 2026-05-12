@@ -113,11 +113,17 @@ def _stream_kokoro(text: str, *, voice: str, speed: float) -> None:
     try:
         subprocess.run(
             [
-                "kokoro-tts", txt_path, "--stream",
-                "--voice", voice or "af_sarah",
-                "--speed", str(speed),
-                "--model", str(model_dir / "kokoro-v1.0.onnx"),
-                "--voices", str(model_dir / "voices-v1.0.bin"),
+                "kokoro-tts",
+                txt_path,
+                "--stream",
+                "--voice",
+                voice or "af_sarah",
+                "--speed",
+                str(speed),
+                "--model",
+                str(model_dir / "kokoro-v1.0.onnx"),
+                "--voices",
+                str(model_dir / "voices-v1.0.bin"),
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,

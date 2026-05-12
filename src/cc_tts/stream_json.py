@@ -137,7 +137,10 @@ def main() -> None:
         config = load_config()
         speed = speed_override if speed_override is not None else config.speed
         speak_streaming(
-            response, voice=config.voice, speed=speed, engine=config.engine,
+            response,
+            voice=config.voice,
+            speed=speed,
+            engine=config.engine,
         )
 
 

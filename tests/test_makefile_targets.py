@@ -34,9 +34,7 @@ def _make_dry_run(target: str) -> subprocess.CompletedProcess[str]:
 class TestSetupSee:
     def test_setup_see_target_exists(self, make_available: None) -> None:
         result = _make_dry_run("setup_see")
-        assert result.returncode == 0, (
-            f"setup_see target missing — stderr: {result.stderr}"
-        )
+        assert result.returncode == 0, f"setup_see target missing — stderr: {result.stderr}"
 
     def test_setup_see_runs_uv_sync_with_see_extra(self, make_available: None) -> None:
         result = _make_dry_run("setup_see")
@@ -48,9 +46,7 @@ class TestSetupSee:
         out = result.stdout.lower()
         assert "moondream" in out
 
-    def test_setup_see_does_not_reference_qwen25_as_default(
-        self, make_available: None
-    ) -> None:
+    def test_setup_see_does_not_reference_qwen25_as_default(self, make_available: None) -> None:
         """The Qwen2.5-VL alt is in setup_see_qwen25, not the default target."""
         result = _make_dry_run("setup_see")
         # The dry-run output for setup_see should not pull in Qwen2.5-VL URLs.
@@ -60,12 +56,8 @@ class TestSetupSee:
 class TestSetupSeeQwen25:
     def test_setup_see_qwen25_target_exists(self, make_available: None) -> None:
         result = _make_dry_run("setup_see_qwen25")
-        assert result.returncode == 0, (
-            f"setup_see_qwen25 target missing — stderr: {result.stderr}"
-        )
+        assert result.returncode == 0, f"setup_see_qwen25 target missing — stderr: {result.stderr}"
 
-    def test_setup_see_qwen25_references_qwen25_model(
-        self, make_available: None
-    ) -> None:
+    def test_setup_see_qwen25_references_qwen25_model(self, make_available: None) -> None:
         result = _make_dry_run("setup_see_qwen25")
         assert "Qwen2.5-VL" in result.stdout
