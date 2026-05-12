@@ -11,6 +11,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
+from cc_vlm import server_manager
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -185,14 +187,25 @@ class LlamaServerVLMEngine:
         server_url: str = "",
         server_model_alias: str = "",
         max_tokens: int = 256,
+        auto_spawn: bool = False,
+        model_path: str = "",
+        mmproj_path: str = "",
+        server_port: int = 8080,
+        server_binary: str = "llama-server",
         **_kwargs: Any,
     ) -> None:
-        # Reason: `_kwargs` absorbs model_path/handler_name/etc. forwarded
-        # uniformly by `resolve_vlm_engine`. Those are meaningless for the
-        # HTTP backend.
+        # Reason: `_kwargs` absorbs handler_name/n_ctx/n_gpu_layers etc.
+        # forwarded uniformly by `resolve_vlm_engine`. Those are meaningless
+        # for the HTTP backend. model_path/mmproj_path/server_port/
+        # server_binary are needed for Phase 2 lazy auto-spawn.
         self.server_url = server_url.rstrip("/")
         self.server_model_alias = server_model_alias
         self.max_tokens = max_tokens
+        self.auto_spawn = auto_spawn
+        self.model_path = model_path
+        self.mmproj_path = mmproj_path
+        self.server_port = server_port
+        self.server_binary = server_binary
 
     @property
     def name(self) -> str:
@@ -201,25 +214,34 @@ class LlamaServerVLMEngine:
     def available(self) -> bool:
         """Check whether llama-server is reachable on `server_url`.
 
-        Returns False on: empty `server_url`, missing `httpx`, non-200
-        health response, connect error, or timeout. Does NOT spawn a
-        server here — that's Phase 2.
+        Order:
+          1. False if `server_url` empty.
+          2. True if `GET /health` returns 200 (user-managed or already
+             running). `server_manager.is_reachable` also returns False
+             when `httpx` is not installed, so missing-deps is handled
+             implicitly.
+          3. False if `auto_spawn` is False, or url is non-localhost, or
+             `model_path` / `mmproj_path` are unset.
+          4. Otherwise call `server_manager.ensure_running` (Phase 2 lazy
+             spawn). May take up to 30 s while the model loads.
         """
         if not self.server_url:
             return False
-        try:
-            import httpx
-        except ImportError:
+        if server_manager.is_reachable(self.server_url):
+            return True
+        if not self.auto_spawn:
             return False
-        try:
-            response = httpx.get(f"{self.server_url}/health", timeout=2.0)
-        except Exception:  # noqa: BLE001
-            # Reason: httpx raises various subclasses (ConnectError,
-            # TimeoutException, ReadTimeout, etc.). All of them mean
-            # "server not reachable" — catch broadly so available()
-            # never propagates a transport error to the caller.
+        if not server_manager.is_localhost(self.server_url):
             return False
-        return response.status_code == 200
+        if not self.model_path or not self.mmproj_path:
+            return False
+        return server_manager.ensure_running(
+            self.server_url,
+            self.server_port,
+            self.server_binary,
+            self.model_path,
+            self.mmproj_path,
+        )
 
     def describe(self, image_path: Path, prompt: str) -> str:
         """Read the image, POST a chat-completion to llama-server, return text.
@@ -286,6 +308,9 @@ def resolve_vlm_engine(
     max_tokens: int = 256,
     server_url: str = "",
     server_model_alias: str = "",
+    auto_spawn: bool = False,
+    server_port: int = 8080,
+    server_binary: str = "llama-server",
 ) -> VLMEngine:
     """Resolve a VLM engine by name or auto-detect first available.
 
@@ -307,6 +332,9 @@ def resolve_vlm_engine(
         "max_tokens": max_tokens,
         "server_url": server_url,
         "server_model_alias": server_model_alias,
+        "auto_spawn": auto_spawn,
+        "server_port": server_port,
+        "server_binary": server_binary,
     }
 
     if engine_name != "auto":

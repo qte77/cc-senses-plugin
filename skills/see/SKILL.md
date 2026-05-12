@@ -30,29 +30,58 @@ Two engines are available; auto-detect picks the first one that's configured.
 | `llamacpp` (in-process) | You have `model_path` + `mmproj_path` set and the appropriate `llama-cpp-python` chat handler exists for your model family | No daemon; reloads the model on every `/see` call (each invocation is a fresh Python process) |
 | `llamaserver` (HTTP) | You want a hot model across `/see` calls, or you're using SmolVLM2 / Qwen3-VL where the in-process handler doesn't exist yet | User runs `llama-server` separately; ~1-2 GB RAM while alive; warm response within 200-500 ms |
 
-### Using a llama-server backend (manual)
+### Using the llama-server backend
 
-For SmolVLM2-2.2B, Qwen3-VL-2B, or any GGUF llama.cpp supports but `llama-cpp-python` doesn't yet:
+Three operating modes, picked by config. Useful for SmolVLM2-2.2B, Qwen3-VL-2B, or any GGUF llama.cpp supports but `llama-cpp-python` doesn't yet.
 
-1. Install `llama.cpp` and ensure `llama-server` is on your PATH.
-2. Start the server with your model + mmproj:
+Prerequisite: `llama-server` must be installed and on your `PATH` (install via your distro's `llama.cpp` package or build from source).
 
-   ```bash
-   llama-server -m /path/to/model.gguf --mmproj /path/to/mmproj.gguf --port 8080
-   ```
+#### 1. Lazy auto-spawn (default)
 
-3. Configure cc-senses-bridge to talk to it. Add to `.cc-senses.toml`:
+cc-senses-bridge spawns `llama-server` on first `/see`, then re-uses the warm process for subsequent calls. Set in `.cc-senses.toml`:
 
-   ```toml
-   [vlm]
-   engine = "llamaserver"
-   server_url = "http://localhost:8080"
-   # server_model_alias is usually unused — llama-server accepts any name
-   ```
+```toml
+[vlm]
+engine = "llamaserver"
+server_url = "http://localhost:8080"
+model_path = "/path/to/SmolVLM2.gguf"
+mmproj_path = "/path/to/SmolVLM2-mmproj.gguf"
+# auto_spawn defaults to true
+```
 
-4. Run `/see` as usual. The model stays resident in `llama-server` between invocations, so latency stays around the inference cost (~200-500 ms) instead of paying the 3-5 s model load on every call.
+First `/see` call takes up to ~30 s (model load). Subsequent calls are warm (~200-500 ms). Inspect/stop the spawned server:
 
-> **Note**: Phase 1 ships manual server management only. Lazy auto-spawn (`auto_spawn = true`) and SessionStart preload (`preload = true`) land in subsequent PRs.
+```bash
+make vlm_server_status   # is it running?
+make vlm_server_logs     # tail the boot log
+make vlm_server_stop     # SIGTERM the spawned process
+```
+
+#### 2. User-managed
+
+You start `llama-server` yourself; cc-senses-bridge just POSTs to it. Useful for shared servers, GPU rigs, or remote hosts.
+
+```bash
+llama-server -m /path/to/model.gguf --mmproj /path/to/mmproj.gguf --port 8080
+```
+
+```toml
+[vlm]
+engine = "llamaserver"
+server_url = "http://localhost:8080"
+auto_spawn = false   # cc-senses-bridge will NOT try to spawn
+```
+
+For remote hosts (`server_url = "http://my-rig.local:8080"`), `auto_spawn` is implicitly disabled — only localhost / 127.0.0.1 / ::1 are eligible for auto-spawn.
+
+#### 3. Preload (Phase 3 — not yet shipped)
+
+Spawns `llama-server` at Claude Code session start so even the first `/see` is hot. Lands in a follow-up PR; tracker in [docs/architecture.md](../../docs/architecture.md#server-lifecycle).
+
+### Known limitations
+
+- **Cold-start concurrency race**: parallel `/see` invocations during the very first call (when the server is being spawned) may produce a transient EADDRINUSE on the losing process's `llama-server` spawn. The system self-heals on the next invocation — `pid_is_alive` detects the dead PID and re-spawns. No file lock for now (YAGNI for interactive CLI use).
+- **30 s spawn timeout**: if the model is large or disk is cold, `available()` can time out waiting for `/health`. Check `make vlm_server_logs` for boot errors.
 
 ## Usage
 

@@ -127,6 +127,9 @@ def main(argv: list[str] | None = None) -> int:
             max_tokens=config.max_tokens,
             server_url=config.server_url,
             server_model_alias=config.server_model_alias,
+            auto_spawn=config.auto_spawn,
+            server_port=config.server_port,
+            server_binary=config.server_binary,
         )
     except (RuntimeError, ValueError) as exc:
         print(f"cc_vlm: {exc}", file=sys.stderr)
