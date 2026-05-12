@@ -65,7 +65,7 @@
     "commit-helper@qte77-claude-code-utils": true,
     "codebase-tools@qte77-claude-code-utils": true,
     "cc-meta@qte77-claude-code-utils": true,
-    "cc-voice@cc-voice": true,
+    "cc-senses-bridge@cc-senses-bridge": true,
     "security-audit@qte77-claude-code-utils": true,
     "makefile-core@qte77-claude-code-utils": true,
     "docs-generator@qte77-claude-code-utils": true,
@@ -79,10 +79,10 @@
         "repo": "qte77/claude-code-plugins"
       }
     },
-    "cc-voice": {
+    "cc-senses-bridge": {
       "source": {
         "source": "github",
-        "repo": "qte77/cc-voice-plugin-prototype"
+        "repo": "qte77/cc-senses-bridge"
       }
     }
   },

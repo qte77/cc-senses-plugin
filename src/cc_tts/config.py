@@ -1,4 +1,4 @@
-"""Configuration loading from .cc-voice.toml [tts] section and environment variables."""
+"""Configuration loading from .cc-senses.toml [tts] section and environment variables."""
 
 from __future__ import annotations
 
@@ -36,5 +36,5 @@ class TTSConfig(BaseSettings):
 
 
 def load_config() -> TTSConfig:
-    """Load config from .cc-voice.toml [tts] section with env var overrides."""
+    """Load config from .cc-senses.toml [tts] section with env var overrides."""
     return TTSConfig(**load_toml_section("tts"))

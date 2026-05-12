@@ -24,7 +24,7 @@ python -m cc_stt $ARGUMENTS
 
 ## Configuration
 
-See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[stt]` section for the full schema and `CC_STT_*` env overrides.
+See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) `[stt]` section for the full schema and `CC_STT_*` env overrides.
 
 ## Status
 

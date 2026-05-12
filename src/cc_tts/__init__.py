@@ -1,3 +1,3 @@
-"""CC-Voice: End-to-end voice plugin for Claude Code."""
+"""cc-senses-bridge: Local multimodal I/O bridge for Claude Code (TTS module)."""
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"

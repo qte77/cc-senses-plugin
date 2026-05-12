@@ -1,4 +1,4 @@
-"""Configuration loading from .cc-voice.toml [stt] section and environment variables."""
+"""Configuration loading from .cc-senses.toml [stt] section and environment variables."""
 
 from __future__ import annotations
 
@@ -38,5 +38,5 @@ class STTConfig(BaseSettings):
 
 
 def load_stt_config() -> STTConfig:
-    """Load STT config from [stt] section of .cc-voice.toml with env var overrides."""
+    """Load STT config from [stt] section of .cc-senses.toml with env var overrides."""
     return STTConfig(**load_toml_section("stt"))

@@ -1,8 +1,0 @@
-# Project-recommended dev defaults for cc-voice.
-# See .cc-voice.example.toml for the full schema, defaults, and env overrides.
-# This file lists only fields that override the example defaults.
-
-[tts]
-engine = "edge"      # example default: "auto"
-voice = "af_sarah"   # example default: "en_US-amy-medium"
-auto_read = true     # example default: false

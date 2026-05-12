@@ -24,7 +24,7 @@ uv run python -m cc_tts.speak $ARGUMENTS
 
 ## Configuration
 
-See [`.cc-voice.example.toml`](../../.cc-voice.example.toml) `[tts]` section for the full schema and `CC_TTS_*` env overrides.
+See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) `[tts]` section for the full schema and `CC_TTS_*` env overrides.
 
 ## Delivery modes
 

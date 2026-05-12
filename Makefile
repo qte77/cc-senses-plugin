@@ -18,7 +18,7 @@ endif
 
 # -- VLM model + llama-cpp-python wheel URLs (single source of truth) --
 # Update these vars when bumping recommended models or wheel index URLs.
-VLM_MODELS_DIR          := $(HOME)/.cache/cc-voice/models
+VLM_MODELS_DIR          := $(HOME)/.cache/cc-senses-bridge/models
 VLM_MOONDREAM_MODEL_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-text-model-f16_ct-q4_0.gguf
 VLM_MOONDREAM_MMPROJ_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-mmproj-f16.gguf
 VLM_QWEN25_MODEL_URL    := https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
@@ -30,7 +30,7 @@ LLAMA_CPP_INDEX_CUDA124 := https://abetlen.github.io/llama-cpp-python/whl/cu124
 # MARK: SETUP
 
 
-setup: ## Install cc-voice package (frozen lockfile)
+setup: ## Install cc-senses-bridge package (frozen lockfile)
 	uv sync --frozen
 
 setup_dev: ## Install with dev + test deps + all extras
@@ -85,7 +85,7 @@ setup_see: ## Install /see deps + download Moondream2 (recommended default VLM)
 		echo "    uv pip install llama-cpp-python --extra-index-url $(LLAMA_CPP_INDEX_CPU)    # CPU"
 	fi
 	echo ""
-	echo "  Then add this to .cc-voice.toml:"
+	echo "  Then add this to .cc-senses.toml:"
 	echo ""
 	echo "    [vlm]"
 	echo "    model_path = \"$$model\""
@@ -110,7 +110,7 @@ setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (alt VLM, richer
 		echo "Qwen2.5-VL-3B mmproj already present — skipping."
 	fi
 	echo ""
-	echo "  Then add this to .cc-voice.toml:"
+	echo "  Then add this to .cc-senses.toml:"
 	echo ""
 	echo "    [vlm]"
 	echo "    model_path = \"$$model\""
@@ -119,7 +119,7 @@ setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (alt VLM, richer
 
 setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no dev tools)
 	@echo ""
-	@echo "  ✓ cc-voice ready for /speak via Kokoro."
+	@echo "  ✓ cc-senses-bridge ready for /speak via Kokoro."
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo ""
 	@echo "  Opt-in for more:"
@@ -130,16 +130,16 @@ setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no
 
 setup_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt ## Developer happy path: dev tools + all TTS + STT
 	@echo ""
-	@echo "✓ cc-voice ready."
+	@echo "✓ cc-senses-bridge ready."
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo "  Then in Claude Code: /speak --toggle"
 
 clean: ## Remove venv + caches (preserves downloaded TTS/STT/VLM models)
 	rm -rf .venv .pytest_cache .ruff_cache .coverage
 
-clean_models: ## Remove downloaded VLM models (~/.cache/cc-voice/models/)
-	@echo "Removing $$HOME/.cache/cc-voice/models/ ..."
-	@rm -rf $$HOME/.cache/cc-voice/models
+clean_models: ## Remove downloaded VLM models (~/.cache/cc-senses-bridge/models/)
+	@echo "Removing $$HOME/.cache/cc-senses-bridge/models/ ..."
+	@rm -rf $$HOME/.cache/cc-senses-bridge/models
 
 clean_see_artifacts: ## Remove /tmp JPEG artifacts produced by cc_vlm --save-only
 	@echo "Removing /tmp JPEG captures ..."
@@ -147,7 +147,7 @@ clean_see_artifacts: ## Remove /tmp JPEG artifacts produced by cc_vlm --save-onl
 
 clean_all: clean clean_models clean_see_artifacts ## Remove venv + caches + models + temp artifacts (full local reset)
 	@echo ""
-	@echo "  All cc-voice local artifacts removed."
+	@echo "  All cc-senses-bridge local artifacts removed."
 	@echo "  For Claude Code plugin removal also run: make plugin_uninstall"
 
 
@@ -252,18 +252,18 @@ smoke: smoke_imports smoke_cli test ## Full smoke: imports + CLIs + test suite
 plugin_validate: ## Validate the local plugin manifest without installing
 	claude plugin validate .
 
-plugin_install_local: ## Install cc-voice from the local working tree (project scope)
+plugin_install_local: ## Install cc-senses-bridge from the local working tree (project scope)
 	@echo "Registering local repo as a project-scope marketplace ..."
 	claude plugin marketplace add "$(CURDIR)" --scope project
-	@echo "Installing cc-voice from local marketplace ..."
-	claude plugin install cc-voice@cc-voice --scope project
+	@echo "Installing cc-senses-bridge from local marketplace ..."
+	claude plugin install cc-senses-bridge@cc-senses-bridge --scope project
 	@echo ""
 	@echo "  ✓ plugin installed (project scope). Verify: make plugin_list"
 	@echo "  Then: make run_cc  (try /speak /listen /see in the session)"
 
-plugin_uninstall: ## Remove cc-voice plugin + local marketplace
-	-claude plugin uninstall cc-voice
-	-claude plugin marketplace remove cc-voice --scope project
+plugin_uninstall: ## Remove cc-senses-bridge plugin + local marketplace
+	-claude plugin uninstall cc-senses-bridge
+	-claude plugin marketplace remove cc-senses-bridge --scope project
 
 plugin_list: ## Show installed Claude Code plugins
 	claude plugin list
@@ -284,8 +284,8 @@ run_voice_stream_json: ## Speak Claude response via stream-json (non-interactive
 run_repl: ## Interactive REPL with stream-json TTS (no Ink UI, sandbox-safe)
 	uv run cc-tts-repl
 
-reinstall_plugin: ## Force-reinstall cc-voice plugin (busts stale cache)
-	claude plugin install cc-voice@cc-voice --force
+reinstall_plugin: ## Force-reinstall cc-senses-bridge plugin (busts stale cache)
+	claude plugin install cc-senses-bridge@cc-senses-bridge --force
 
 
 # MARK: VERSION

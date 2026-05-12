@@ -1,6 +1,6 @@
 # Engine & model landscape
 
-What we evaluated for cc-voice's three subsystems — what shipped, what's
+What we evaluated for cc-senses-bridge's three subsystems — what shipped, what's
 deferred, what's rejected and why. This is the **single source of truth
 for engine/model decisions**; `docs/architecture.md` describes the
 shipped engines in detail and `docs/roadmap/v0.5.x.md` tracks
@@ -40,7 +40,7 @@ for full details (latency, deps, notes).
 | `kokoro` (auto-detect default) | best local quality | Apache 2.0 |
 | `edge-tts` | high quality, requires internet | MIT (client); cloud service |
 | `piper` | neural VITS, ~60 MB voice models | MIT |
-| `espeak` | basic, zero-config fallback | GPL-3.0 (binary; cc-voice invokes via subprocess) |
+| `espeak` | basic, zero-config fallback | GPL-3.0 (binary; cc-senses-bridge invokes via subprocess) |
 
 ### Tracked
 
@@ -125,20 +125,20 @@ To be filed as issues; placeholder list for now.
 | Candidate | Why not |
 |---|---|
 | **inferrs** as VLM backend | Text-LLM only; no vision support anywhere in README/features. Verified via WebFetch. |
-| **DPT-2 Mini** (Landing AI) | Cloud-only API, English-only, "Preview — do not use in production" status, proprietary. Every axis contradicts cc-voice's local-first positioning. |
+| **DPT-2 Mini** (Landing AI) | Cloud-only API, English-only, "Preview — do not use in production" status, proprietary. Every axis contradicts cc-senses-bridge's local-first positioning. |
 | **LFM2-VL-3B** (Liquid AI) | Two blockers: active CPU-only inference bug ([llama.cpp #19184](https://github.com/ggml-org/llama.cpp/issues/19184)) and LFM Open License v1.0 imposes a $10M revenue cap (not Apache 2.0). Revisit only if the bug closes AND the license relaxes. |
 | **Moondream3 (preview)** | Business Source License 1.1 — not OSI-compliant; "Additional Use Grant (No Third-Party Service)" clause forbids hosted-service use. No GGUF; transformers-only runtime. |
 | **Florence-2** (Microsoft) | Encoder-decoder architecture; not representable in GGUF / not supported by llama.cpp. Would require a parallel runtime (`transformers` or ONNX) and a different `describe()` calling convention (task-based, not chat). Out of scope for the current Protocol. |
-| **Apple FastVLM** | Apple Silicon-optimized; primary runtime is MLX, not llama.cpp. No `abetlen/llama-cpp-python` handler. Worth revisiting only if cc-voice adds an `MLXVLMEngine` backend specifically for macOS users. |
+| **Apple FastVLM** | Apple Silicon-optimized; primary runtime is MLX, not llama.cpp. No `abetlen/llama-cpp-python` handler. Worth revisiting only if cc-senses-bridge adds an `MLXVLMEngine` backend specifically for macOS users. |
 | **Phi-4-Multimodal** (Microsoft) | ~14B params; ~9-10 GB at Q4; 12 GB GPU recommended. Too heavy for CPU-only deployment. |
 
 ## Cross-subsystem frameworks
 
 ### Rejected
 
-These offered to *replace* cc-voice's architecture rather than slot into a single subsystem.
+These offered to *replace* cc-senses-bridge's architecture rather than slot into a single subsystem.
 
 | Candidate | Why not |
 |---|---|
-| **PersonaPlex** | Scope mismatch — replaces Claude Code's LLM entirely. cc-voice's value prop is "Claude Code does the thinking". Only useful as a future-direction note for the half-duplex → full-duplex frontier (see roadmap "Deferred ideas"). |
-| **TEN-framework** (Agora) | Non-OSI clauses on top of Apache 2.0 forbid hosting on end-user devices; daemon-required runtime; bundled STT/TTS are cloud APIs (Deepgram/ElevenLabs). Full-duplex agent framework, not a half-duplex engine — every cc-voice hard constraint violated. |
+| **PersonaPlex** | Scope mismatch — replaces Claude Code's LLM entirely. cc-senses-bridge's value prop is "Claude Code does the thinking". Only useful as a future-direction note for the half-duplex → full-duplex frontier (see roadmap "Deferred ideas"). |
+| **TEN-framework** (Agora) | Non-OSI clauses on top of Apache 2.0 forbid hosting on end-user devices; daemon-required runtime; bundled STT/TTS are cloud APIs (Deepgram/ElevenLabs). Full-duplex agent framework, not a half-duplex engine — every cc-senses-bridge hard constraint violated. |

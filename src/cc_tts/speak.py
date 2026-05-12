@@ -17,7 +17,7 @@ from cc_tts.preprocess import preprocess
 _output_counter = 0
 
 # PID file for --stop interrupt. Stores the current speak PGID (process group).
-_PID_FILE = Path.home() / ".cache" / "cc-voice" / "speak.pid"
+_PID_FILE = Path.home() / ".cache" / "cc-senses-bridge" / "speak.pid"
 
 
 def _write_pidfile() -> None:
@@ -94,12 +94,12 @@ def synthesize_and_play(text: str, config: TTSConfig | None = None) -> None:
 
 
 def _toggle_auto_read() -> None:
-    """Toggle auto_read in .cc-voice.toml [tts] section."""
+    """Toggle auto_read in .cc-senses.toml [tts] section."""
     from cc_voice_common.config import find_config_file
 
     config_path = find_config_file()
     if config_path is None:
-        print("No .cc-voice.toml found — create one first", file=sys.stderr)
+        print("No .cc-senses.toml found — create one first", file=sys.stderr)
         sys.exit(1)
 
     content = config_path.read_text()
@@ -110,17 +110,17 @@ def _toggle_auto_read() -> None:
         content = content.replace("auto_read = false", "auto_read = true", 1)
         print("auto_read: false → true")
     else:
-        print("auto_read field not found in .cc-voice.toml [tts] section", file=sys.stderr)
+        print("auto_read field not found in .cc-senses.toml [tts] section", file=sys.stderr)
         sys.exit(1)
     config_path.write_text(content)
 
 
 def main() -> None:
-    """CLI entry point for cc-voice speak.
+    """CLI entry point for cc-senses-bridge speak.
 
     Usage:
         python -m cc_tts.speak <text>       speak the given text
-        python -m cc_tts.speak --toggle     flip auto_read in .cc-voice.toml
+        python -m cc_tts.speak --toggle     flip auto_read in .cc-senses.toml
         python -m cc_tts.speak --help       show usage
     """
     if "--help" in sys.argv or "-h" in sys.argv:
@@ -128,7 +128,7 @@ def main() -> None:
         print("  <text>    Speak the given text via the configured TTS engine")
         print("  --stream  Stream audio directly to player (no temp files)")
         print("  --stop    Interrupt ongoing TTS playback (SIGTERM to process group)")
-        print("  --toggle  Flip auto_read in .cc-voice.toml (enables/disables Stop hook TTS)")
+        print("  --toggle  Flip auto_read in .cc-senses.toml (enables/disables Stop hook TTS)")
         print("  --help    Show this message")
         return
 
