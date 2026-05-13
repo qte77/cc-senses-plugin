@@ -5,6 +5,7 @@
 	setup_see setup_see_qwen25 setup_user setup_all \
 	clean validate lint_fix quick_validate lint_src lint_tests lint_md lint_links \
 	type_check test test_coverage speak wrap \
+	vlm_server_status vlm_server_stop vlm_server_logs \
 	bump_patch bump_minor bump_major help
 .DEFAULT_GOAL := help
 
@@ -222,6 +223,34 @@ see_save_only: ## Capture screen + save JPEG, print path (smoke-test mss + proce
 	uv run python -m cc_vlm --save-only
 
 
+# MARK: VLM SERVER
+
+
+vlm_server_status: ## Check if cc-senses-bridge's spawned llama-server is running
+	pidfile=$$HOME/.cache/cc-senses-bridge/llama-server.pid
+	if [ ! -f $$pidfile ]; then
+		echo "llama-server not running (no pidfile at $$pidfile)"
+		exit 0
+	fi
+	pid=$$(cat $$pidfile)
+	if kill -0 $$pid 2>/dev/null; then
+		echo "llama-server running (PID $$pid)"
+	else
+		echo "llama-server not running (stale pidfile points at PID $$pid)"
+	fi
+
+vlm_server_stop: ## Stop cc-senses-bridge-spawned llama-server (no-op if external/unmanaged)
+	uv run python -c "from cc_vlm.server_manager import shutdown; shutdown(only_if_ours=True); print('  llama-server stopped (or already stopped)')"
+
+vlm_server_logs: ## Tail the spawned llama-server log (~/.cache/cc-senses-bridge/llama-server.log)
+	logfile=$$HOME/.cache/cc-senses-bridge/llama-server.log
+	if [ ! -f $$logfile ]; then
+		echo "No log file at $$logfile"
+		exit 1
+	fi
+	tail -f $$logfile
+
+
 # MARK: SMOKE
 
 
@@ -231,7 +260,7 @@ smoke_imports: ## Smoke: verify all cc_* modules import cleanly (no external dep
 	@echo "--- cc_stt imports"
 	@uv run python -c "import cc_stt.engine, cc_stt.config, cc_stt.listen; print('  ok')"
 	@echo "--- cc_vlm imports"
-	@uv run python -c "import cc_vlm.engine, cc_vlm.config, cc_vlm.capture, cc_vlm.processor, cc_vlm.templates, cc_vlm.cache; print('  ok')"
+	@uv run python -c "import cc_vlm.engine, cc_vlm.config, cc_vlm.capture, cc_vlm.processor, cc_vlm.templates, cc_vlm.cache, cc_vlm.server_manager; print('  ok')"
 
 smoke_cli: ## Smoke: verify each module's --help works
 	@echo "--- cc_tts.speak --help"
