@@ -1,1 +1,6 @@
 exclude_path = [".venv", ".pytest_cache", ".ruff_cache"]
+# Skip CodeFactor badge URLs — they 404 transiently after a repo rename
+# while CodeFactor re-indexes. The badge image itself fails open in the
+# README, so a transient 404 here would cause CI noise without value.
+exclude = ["codefactor\\.io"]
+
