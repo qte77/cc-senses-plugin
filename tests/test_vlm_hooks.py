@@ -117,9 +117,7 @@ class TestPreloadHookDispatcher:
 class TestPreloadHookRunner:
     """`preload_hook.run_preload_sync()` is what the detached subprocess calls."""
 
-    def test_calls_ensure_running_with_config_values(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_calls_ensure_running_with_config_values(self, monkeypatch: pytest.MonkeyPatch) -> None:
         cfg = VLMConfig(
             preload=True,
             model_path="/m.gguf",
