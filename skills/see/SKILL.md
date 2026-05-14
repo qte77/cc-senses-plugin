@@ -74,9 +74,27 @@ auto_spawn = false   # cc-senses-bridge will NOT try to spawn
 
 For remote hosts (`server_url = "http://my-rig.local:8080"`), `auto_spawn` is implicitly disabled — only localhost / 127.0.0.1 / ::1 are eligible for auto-spawn.
 
-#### 3. Preload (Phase 3 — not yet shipped)
+#### 3. Preload
 
-Spawns `llama-server` at Claude Code session start so even the first `/see` is hot. Lands in a follow-up PR; tracker in [docs/architecture.md](../../docs/architecture.md#server-lifecycle).
+Spawns `llama-server` at Claude Code session start so even the first `/see` is hot. Set in `.cc-senses.toml`:
+
+```toml
+[vlm]
+engine = "llamaserver"
+model_path = "/path/to/model.gguf"
+mmproj_path = "/path/to/mmproj.gguf"
+preload = true
+```
+
+When the CC session starts, the SessionStart hook (`cc-vlm-preload`) spawns `llama-server` in a detached background process. By the time you type `/see` for the first time, the model is already loaded and the first call is warm (~200-500 ms). Trade-off: ~1-2 GB RAM is held for the entire session, even if `/see` is never used. Turn preload off for sessions where you don't expect to use vision.
+
+```bash
+make vlm_server_status   # verify the server came up
+make vlm_server_logs     # inspect boot output if it didn't
+make vlm_server_stop     # manually stop the daemon mid-session
+```
+
+The SessionEnd hook (`cc-vlm-shutdown`) terminates the spawned server automatically when the CC session closes. If CC crashes, the daemon may persist — `make vlm_server_status` catches that, `make vlm_server_stop` cleans it up.
 
 ### Known limitations
 

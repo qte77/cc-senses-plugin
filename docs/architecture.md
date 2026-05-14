@@ -97,7 +97,7 @@ Engine priority (auto-detect order): `llamacpp` → `llamaserver` (in-process pr
 |---|---|---|---|
 | **User-managed** | `auto_spawn = false` | None (user runs `llama-server`) | Cold if user hasn't started it (engine returns "unreachable") |
 | **Lazy (default)** | `auto_spawn = true` | First `/see` call when `/health` probe fails | Up to ~30 s (model load) |
-| **Preload** (Phase 3) | `preload = true` | SessionStart hook | Hot from call 1; ~3-5 s background load at session start |
+| **Preload** | `preload = true` | SessionStart hook | Hot from call 1; ~3-5 s background load at session start |
 
 The lifecycle helpers live in `src/cc_vlm/server_manager.py`:
 
@@ -106,6 +106,8 @@ The lifecycle helpers live in `src/cc_vlm/server_manager.py`:
 - Auto-spawn is gated on `is_localhost(server_url)` — remote hosts are assumed externally managed and silently skip the spawn attempt.
 - `ensure_running()` is idempotent: probe `/health` first, then check the pidfile, only spawn as a last resort.
 - Concurrency: best-effort, no file lock. Parallel `/see` invocations during cold start may produce transient EADDRINUSE on the loser's spawn; the system self-heals on the next invocation via `pid_is_alive`.
+
+The preload hooks are registered in `hooks/hooks.json`. `cc-vlm-preload` runs on SessionStart: it reads `VLMConfig`, and if `preload = true` with `model_path` and `mmproj_path` set, it calls `ensure_running()` in a detached background process so session startup itself is not blocked. `cc-vlm-shutdown` runs on SessionEnd and calls `shutdown(only_if_ours=True)`, which terminates the spawned `llama-server` via the pidfile; if the user is managing the daemon themselves (no pidfile), it is a no-op.
 
 Manual control via Makefile targets: `make vlm_server_status` / `vlm_server_stop` / `vlm_server_logs`.
 
