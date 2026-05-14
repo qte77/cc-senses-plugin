@@ -24,7 +24,7 @@ from pathlib import Path
 
 from cc_vlm.config import load_vlm_config
 
-_LOG_PATH = Path.home() / ".cache" / "cc-senses-bridge" / "preload.log"
+_LOG_PATH = Path.home() / ".cache" / "cc-senses-plugin" / "preload.log"
 
 
 def _debug(msg: str) -> None:

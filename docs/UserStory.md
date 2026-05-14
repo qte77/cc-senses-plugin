@@ -1,6 +1,6 @@
 # User Stories
 
-End-to-end flows showing how cc-senses-bridge fits into a real working session.
+End-to-end flows showing how cc-senses-plugin fits into a real working session.
 For the full configuration schema, see [`.cc-senses.example.toml`](../.cc-senses.example.toml).
 For pipeline and engine details, see [architecture.md](architecture.md).
 
@@ -26,7 +26,7 @@ Steps:
 1. `/speak --toggle` — enables Stop-hook auto-read so every response
    is spoken once it completes.
 2. `/voice` — enables Claude Code's built-in mic input.
-3. Speak a prompt → Claude transcribes → answers in text → cc-senses-bridge
+3. Speak a prompt → Claude transcribes → answers in text → cc-senses-plugin
    reads the answer aloud.
 
 Minimal config (in `.cc-senses.toml`):
@@ -55,7 +55,7 @@ Two paths exist:
   device to extract a short text summary; ~120 tokens per call. Lower
   fidelity, but cheap enough to use repeatedly.
 
-cc-senses-bridge's `/see` uses the local path by default.
+cc-senses-plugin's `/see` uses the local path by default.
 
 Steps:
 
@@ -79,8 +79,8 @@ Minimal config (run `make setup_see` to populate the paths):
 
 ```toml
 [vlm]
-model_path = "/home/USER/.cache/cc-senses-bridge/models/moondream2-text-model-f16_ct-q4_0.gguf"
-mmproj_path = "/home/USER/.cache/cc-senses-bridge/models/moondream2-mmproj-f16.gguf"
+model_path = "/home/USER/.cache/cc-senses-plugin/models/moondream2-text-model-f16_ct-q4_0.gguf"
+mmproj_path = "/home/USER/.cache/cc-senses-plugin/models/moondream2-mmproj-f16.gguf"
 handler_name = "moondream"
 ```
 
@@ -96,7 +96,7 @@ shell or REPL.
 uv run cc-tts --stop
 ```
 
-Reads the PID file at `~/.cache/cc-senses-bridge/speak.pid` and SIGTERMs the
+Reads the PID file at `~/.cache/cc-senses-plugin/speak.pid` and SIGTERMs the
 whole process group. Works for all delivery modes (Stop hook,
 stream-json, PTY proxy) — every mode writes the pidfile on start.
 

@@ -1,1 +1,1 @@
-"""Shared utilities for cc-senses-bridge plugins."""
+"""Shared utilities for cc-senses-plugin plugins."""

@@ -20,8 +20,8 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
-PID_FILE = Path.home() / ".cache" / "cc-senses-bridge" / "llama-server.pid"
-LOG_FILE = Path.home() / ".cache" / "cc-senses-bridge" / "llama-server.log"
+PID_FILE = Path.home() / ".cache" / "cc-senses-plugin" / "llama-server.pid"
+LOG_FILE = Path.home() / ".cache" / "cc-senses-plugin" / "llama-server.log"
 
 _LOCALHOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
 

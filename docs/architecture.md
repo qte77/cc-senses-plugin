@@ -1,13 +1,13 @@
 # Architecture
 
-Single source of truth for cc-senses-bridge pipeline and engine details.
+Single source of truth for cc-senses-plugin pipeline and engine details.
 ADRs in `docs/adr/` record decisions; this file records the current design.
 
 ---
 
 ## Overview
 
-cc-senses-bridge adds three subsystems to Claude Code:
+cc-senses-plugin adds three subsystems to Claude Code:
 
 | Subsystem | Command | Role |
 |---|---|---|
@@ -101,8 +101,8 @@ Engine priority (auto-detect order): `llamacpp` → `llamaserver` (in-process pr
 
 The lifecycle helpers live in `src/cc_vlm/server_manager.py`:
 
-- PID file: `~/.cache/cc-senses-bridge/llama-server.pid`
-- Log file: `~/.cache/cc-senses-bridge/llama-server.log` (truncated on each spawn)
+- PID file: `~/.cache/cc-senses-plugin/llama-server.pid`
+- Log file: `~/.cache/cc-senses-plugin/llama-server.log` (truncated on each spawn)
 - Auto-spawn is gated on `is_localhost(server_url)` — remote hosts are assumed externally managed and silently skip the spawn attempt.
 - `ensure_running()` is idempotent: probe `/health` first, then check the pidfile, only spawn as a last resort.
 - Concurrency: best-effort, no file lock. Parallel `/see` invocations during cold start may produce transient EADDRINUSE on the loser's spawn; the system self-heals on the next invocation via `pid_is_alive`.

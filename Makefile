@@ -19,7 +19,7 @@ endif
 
 # -- VLM model + llama-cpp-python wheel URLs (single source of truth) --
 # Update these vars when bumping recommended models or wheel index URLs.
-VLM_MODELS_DIR          := $(HOME)/.cache/cc-senses-bridge/models
+VLM_MODELS_DIR          := $(HOME)/.cache/cc-senses-plugin/models
 VLM_MOONDREAM_MODEL_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-text-model-f16_ct-q4_0.gguf
 VLM_MOONDREAM_MMPROJ_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-mmproj-f16.gguf
 VLM_QWEN25_MODEL_URL    := https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
@@ -31,7 +31,7 @@ LLAMA_CPP_INDEX_CUDA124 := https://abetlen.github.io/llama-cpp-python/whl/cu124
 # MARK: SETUP
 
 
-setup: ## Install cc-senses-bridge package (frozen lockfile)
+setup: ## Install cc-senses-plugin package (frozen lockfile)
 	uv sync --frozen
 
 setup_dev: ## Install with dev + test deps + all extras
@@ -120,7 +120,7 @@ setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (alt VLM, richer
 
 setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no dev tools)
 	@echo ""
-	@echo "  ✓ cc-senses-bridge ready for /speak via Kokoro."
+	@echo "  ✓ cc-senses-plugin ready for /speak via Kokoro."
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo ""
 	@echo "  Opt-in for more:"
@@ -131,16 +131,16 @@ setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no
 
 setup_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt ## Developer happy path: dev tools + all TTS + STT
 	@echo ""
-	@echo "✓ cc-senses-bridge ready."
+	@echo "✓ cc-senses-plugin ready."
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo "  Then in Claude Code: /speak --toggle"
 
 clean: ## Remove venv + caches (preserves downloaded TTS/STT/VLM models)
 	rm -rf .venv .pytest_cache .ruff_cache .coverage
 
-clean_models: ## Remove downloaded VLM models (~/.cache/cc-senses-bridge/models/)
-	@echo "Removing $$HOME/.cache/cc-senses-bridge/models/ ..."
-	@rm -rf $$HOME/.cache/cc-senses-bridge/models
+clean_models: ## Remove downloaded VLM models (~/.cache/cc-senses-plugin/models/)
+	@echo "Removing $$HOME/.cache/cc-senses-plugin/models/ ..."
+	@rm -rf $$HOME/.cache/cc-senses-plugin/models
 
 clean_see_artifacts: ## Remove /tmp JPEG artifacts produced by cc_vlm --save-only
 	@echo "Removing /tmp JPEG captures ..."
@@ -148,7 +148,7 @@ clean_see_artifacts: ## Remove /tmp JPEG artifacts produced by cc_vlm --save-onl
 
 clean_all: clean clean_models clean_see_artifacts ## Remove venv + caches + models + temp artifacts (full local reset)
 	@echo ""
-	@echo "  All cc-senses-bridge local artifacts removed."
+	@echo "  All cc-senses-plugin local artifacts removed."
 	@echo "  For Claude Code plugin removal also run: make plugin_uninstall"
 
 
@@ -226,8 +226,8 @@ see_save_only: ## Capture screen + save JPEG, print path (smoke-test mss + proce
 # MARK: VLM SERVER
 
 
-vlm_server_status: ## Check if cc-senses-bridge's spawned llama-server is running
-	pidfile=$$HOME/.cache/cc-senses-bridge/llama-server.pid
+vlm_server_status: ## Check if cc-senses-plugin's spawned llama-server is running
+	pidfile=$$HOME/.cache/cc-senses-plugin/llama-server.pid
 	if [ ! -f $$pidfile ]; then
 		echo "llama-server not running (no pidfile at $$pidfile)"
 		exit 0
@@ -239,11 +239,11 @@ vlm_server_status: ## Check if cc-senses-bridge's spawned llama-server is runnin
 		echo "llama-server not running (stale pidfile points at PID $$pid)"
 	fi
 
-vlm_server_stop: ## Stop cc-senses-bridge-spawned llama-server (no-op if external/unmanaged)
+vlm_server_stop: ## Stop cc-senses-plugin-spawned llama-server (no-op if external/unmanaged)
 	uv run python -c "from cc_vlm.server_manager import shutdown; shutdown(only_if_ours=True); print('  llama-server stopped (or already stopped)')"
 
-vlm_server_logs: ## Tail the spawned llama-server log (~/.cache/cc-senses-bridge/llama-server.log)
-	logfile=$$HOME/.cache/cc-senses-bridge/llama-server.log
+vlm_server_logs: ## Tail the spawned llama-server log (~/.cache/cc-senses-plugin/llama-server.log)
+	logfile=$$HOME/.cache/cc-senses-plugin/llama-server.log
 	if [ ! -f $$logfile ]; then
 		echo "No log file at $$logfile"
 		exit 1
@@ -281,18 +281,18 @@ smoke: smoke_imports smoke_cli test ## Full smoke: imports + CLIs + test suite
 plugin_validate: ## Validate the local plugin manifest without installing
 	claude plugin validate .
 
-plugin_install_local: ## Install cc-senses-bridge from the local working tree (project scope)
+plugin_install_local: ## Install cc-senses-plugin from the local working tree (project scope)
 	@echo "Registering local repo as a project-scope marketplace ..."
 	claude plugin marketplace add "$(CURDIR)" --scope project
-	@echo "Installing cc-senses-bridge from local marketplace ..."
-	claude plugin install cc-senses-bridge@cc-senses-bridge --scope project
+	@echo "Installing cc-senses-plugin from local marketplace ..."
+	claude plugin install cc-senses-plugin@cc-senses-plugin --scope project
 	@echo ""
 	@echo "  ✓ plugin installed (project scope). Verify: make plugin_list"
 	@echo "  Then: make run_cc  (try /speak /listen /see in the session)"
 
-plugin_uninstall: ## Remove cc-senses-bridge plugin + local marketplace
-	-claude plugin uninstall cc-senses-bridge
-	-claude plugin marketplace remove cc-senses-bridge --scope project
+plugin_uninstall: ## Remove cc-senses-plugin plugin + local marketplace
+	-claude plugin uninstall cc-senses-plugin
+	-claude plugin marketplace remove cc-senses-plugin --scope project
 
 plugin_list: ## Show installed Claude Code plugins
 	claude plugin list
@@ -313,8 +313,8 @@ run_voice_stream_json: ## Speak Claude response via stream-json (non-interactive
 run_repl: ## Interactive REPL with stream-json TTS (no Ink UI, sandbox-safe)
 	uv run cc-tts-repl
 
-reinstall_plugin: ## Force-reinstall cc-senses-bridge plugin (busts stale cache)
-	claude plugin install cc-senses-bridge@cc-senses-bridge --force
+reinstall_plugin: ## Force-reinstall cc-senses-plugin plugin (busts stale cache)
+	claude plugin install cc-senses-plugin@cc-senses-plugin --force
 
 
 # MARK: VERSION

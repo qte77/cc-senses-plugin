@@ -178,7 +178,7 @@ def main() -> None:
         args=(proc.stdout, _make_on_text(response_text, first_delta, sentence_buf), turn_done),
         daemon=True,
     ).start()
-    print("cc-senses-bridge REPL • /exit to quit, /stop to interrupt TTS, /toggle for auto-read\n")
+    print("cc-senses-plugin REPL • /exit to quit, /stop to interrupt TTS, /toggle for auto-read\n")
 
     last_interrupt = 0.0
 

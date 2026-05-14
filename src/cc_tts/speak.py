@@ -17,7 +17,7 @@ from cc_tts.preprocess import preprocess
 _output_counter = 0
 
 # PID file for --stop interrupt. Stores the current speak PGID (process group).
-_PID_FILE = Path.home() / ".cache" / "cc-senses-bridge" / "speak.pid"
+_PID_FILE = Path.home() / ".cache" / "cc-senses-plugin" / "speak.pid"
 
 
 def _write_pidfile() -> None:
@@ -116,7 +116,7 @@ def _toggle_auto_read() -> None:
 
 
 def main() -> None:
-    """CLI entry point for cc-senses-bridge speak.
+    """CLI entry point for cc-senses-plugin speak.
 
     Usage:
         python -m cc_tts.speak <text>       speak the given text
