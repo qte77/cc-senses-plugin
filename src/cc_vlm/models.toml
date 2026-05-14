@@ -1,0 +1,42 @@
+# VLM model registry — single source of truth for setup_see* Make targets.
+#
+# Each entry is a model key (used as the CLI argument to setup_models).
+# Required keys:
+#   title       — human-readable name for log lines
+#   engine      — "llamacpp" (in-process) or "llamaserver" (mainline binary)
+#   model_url   — GGUF text-model URL on HuggingFace
+#   mmproj_url  — GGUF mmproj URL on HuggingFace
+# Engine-specific keys:
+#   handler_name — required iff engine == "llamacpp" (maps to llama-cpp-python class)
+#   server_url   — required iff engine == "llamaserver" (loopback by default)
+#
+# Filenames are derived from URL basenames automatically — never set them here.
+# URL liveness is verified by tests/preflight_vlm_urls.sh before changes land.
+
+[moondream]
+title = "Moondream2"
+engine = "llamacpp"
+handler_name = "moondream"
+model_url = "https://huggingface.co/moondream/moondream2-gguf/resolve/main/moondream2-text-model-f16.gguf"
+mmproj_url = "https://huggingface.co/moondream/moondream2-gguf/resolve/main/moondream2-mmproj-f16.gguf"
+
+[qwen25vl]
+title = "Qwen2.5-VL-3B"
+engine = "llamacpp"
+handler_name = "qwen2.5vl"
+model_url = "https://huggingface.co/lmstudio-community/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf"
+mmproj_url = "https://huggingface.co/lmstudio-community/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-model-f16.gguf"
+
+[qwen3vl]
+title = "Qwen3-VL-2B"
+engine = "llamaserver"
+server_url = "http://127.0.0.1:8080"
+model_url = "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/Qwen3VL-2B-Instruct-Q4_K_M.gguf"
+mmproj_url = "https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct-GGUF/resolve/main/mmproj-Qwen3VL-2B-Instruct-Q8_0.gguf"
+
+[smolvlm]
+title = "SmolVLM-500M"
+engine = "llamaserver"
+server_url = "http://127.0.0.1:8080"
+model_url = "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/SmolVLM-500M-Instruct-Q8_0.gguf"
+mmproj_url = "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-Q8_0.gguf"
