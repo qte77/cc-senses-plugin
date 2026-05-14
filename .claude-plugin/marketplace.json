@@ -1,5 +1,5 @@
 {
-  "name": "cc-senses-bridge",
+  "name": "cc-senses-plugin",
   "owner": {
     "name": "qte77"
   },
@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "cc-senses-bridge",
+      "name": "cc-senses-plugin",
       "source": "./",
       "description": "Local multimodal I/O — /speak (TTS), /listen (STT), /see (VLM)",
       "version": "0.9.0"

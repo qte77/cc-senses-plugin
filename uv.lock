@@ -270,7 +270,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cc-senses-bridge"
+name = "cc-senses-plugin"
 version = "0.9.0"
 source = { editable = "." }
 dependencies = [
@@ -316,10 +316,10 @@ test = [
 requires-dist = [
     { name = "blake3", marker = "extra == 'see'", specifier = ">=0.4.0" },
     { name = "bump-my-version", marker = "extra == 'dev'", specifier = ">=1.3.0" },
-    { name = "cc-senses-bridge", extras = ["edge"], marker = "extra == 'all'" },
-    { name = "cc-senses-bridge", extras = ["piper"], marker = "extra == 'all'" },
-    { name = "cc-senses-bridge", extras = ["see"], marker = "extra == 'all'" },
-    { name = "cc-senses-bridge", extras = ["stt"], marker = "extra == 'all'" },
+    { name = "cc-senses-plugin", extras = ["edge"], marker = "extra == 'all'" },
+    { name = "cc-senses-plugin", extras = ["piper"], marker = "extra == 'all'" },
+    { name = "cc-senses-plugin", extras = ["see"], marker = "extra == 'all'" },
+    { name = "cc-senses-plugin", extras = ["stt"], marker = "extra == 'all'" },
     { name = "edge-tts", marker = "extra == 'edge'", specifier = ">=7.2.8" },
     { name = "httpx", marker = "extra == 'see'", specifier = ">=0.27" },
     { name = "mss", marker = "extra == 'see'", specifier = ">=9.0.0" },

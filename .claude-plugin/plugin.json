@@ -1,5 +1,5 @@
 {
-  "name": "cc-senses-bridge",
+  "name": "cc-senses-plugin",
   "version": "0.9.0",
   "description": "Local multimodal I/O bridge for Claude Code — TTS (/speak), STT (/listen), VLM (/see).",
   "author": {
