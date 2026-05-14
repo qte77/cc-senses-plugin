@@ -19,7 +19,7 @@ make setup_see           # default: Moondream2 (~0.9 GB Q4, fastest CPU)
 make setup_see_qwen25    # alt: Qwen2.5-VL-3B (~1.6 GB Q4, richer output)
 ```
 
-Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-bridge/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) for the full `[vlm]` schema.
+Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-plugin/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) for the full `[vlm]` schema.
 
 ## Engines
 
@@ -38,7 +38,7 @@ Prerequisite: `llama-server` must be installed and on your `PATH` (install via y
 
 #### 1. Lazy auto-spawn (default)
 
-cc-senses-bridge spawns `llama-server` on first `/see`, then re-uses the warm process for subsequent calls. Set in `.cc-senses.toml`:
+cc-senses-plugin spawns `llama-server` on first `/see`, then re-uses the warm process for subsequent calls. Set in `.cc-senses.toml`:
 
 ```toml
 [vlm]
@@ -59,7 +59,7 @@ make vlm_server_stop     # SIGTERM the spawned process
 
 #### 2. User-managed
 
-You start `llama-server` yourself; cc-senses-bridge just POSTs to it. Useful for shared servers, GPU rigs, or remote hosts.
+You start `llama-server` yourself; cc-senses-plugin just POSTs to it. Useful for shared servers, GPU rigs, or remote hosts.
 
 ```bash
 llama-server -m /path/to/model.gguf --mmproj /path/to/mmproj.gguf --port 8080
@@ -69,7 +69,7 @@ llama-server -m /path/to/model.gguf --mmproj /path/to/mmproj.gguf --port 8080
 [vlm]
 engine = "llamaserver"
 server_url = "http://localhost:8080"
-auto_spawn = false   # cc-senses-bridge will NOT try to spawn
+auto_spawn = false   # cc-senses-plugin will NOT try to spawn
 ```
 
 For remote hosts (`server_url = "http://my-rig.local:8080"`), `auto_spawn` is implicitly disabled — only localhost / 127.0.0.1 / ::1 are eligible for auto-spawn.
@@ -131,7 +131,7 @@ make smoke                           # imports + --help + full test suite
 
 ```bash
 make plugin_validate                 # sanity-check the manifest first
-make plugin_install_local            # registers local marketplace + installs cc-senses-bridge (project scope)
+make plugin_install_local            # registers local marketplace + installs cc-senses-plugin (project scope)
 make run_cc                          # starts claude; then type /see in the session
 make plugin_uninstall                # removes plugin + marketplace when done
 ```
@@ -160,7 +160,7 @@ For an end-to-end user flow (feeding screen content to Claude so it can debug or
 |---|---|
 | Per-session cache (in-memory `DescribeCache`) | Exits with the Python process. Nothing to clean. |
 | Temp JPEGs (`/tmp/tmp*.jpg`) | `make clean_see_artifacts` |
-| Downloaded GGUF + mmproj (`~/.cache/cc-senses-bridge/models/`) | `make clean_models` |
+| Downloaded GGUF + mmproj (`~/.cache/cc-senses-plugin/models/`) | `make clean_models` |
 | Python venv + pytest/ruff caches | `make clean` |
 | All of the above at once | `make clean_all` |
 | Plugin installation (if done via `make plugin_install_local`) | `make plugin_uninstall` |
