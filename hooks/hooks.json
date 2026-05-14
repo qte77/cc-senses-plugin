@@ -11,6 +11,30 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python -m cc_vlm.preload_hook",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python -m cc_vlm.shutdown_hook",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

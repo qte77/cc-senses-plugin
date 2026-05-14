@@ -30,6 +30,8 @@ cc-tts = "cc_tts.speak:main"              # speak text: cc-tts "hello"  |  cc-tt
 cc-tts-wrap = "cc_tts.pty_proxy:main"     # PTY proxy: cc-tts-wrap claude (interactive, fragile)
 cc-tts-stream = "cc_tts.stream_json:main" # stream-json: cc-tts-stream "prompt" (non-interactive, robust)
 cc-tts-repl = "cc_tts.repl:main"         # REPL: cc-tts-repl (interactive stream-json + TTS)
+cc-vlm-preload = "cc_vlm.preload_hook:main"   # SessionStart hook target
+cc-vlm-shutdown = "cc_vlm.shutdown_hook:main" # SessionEnd hook target
 
 [build-system]
 requires = ["hatchling"]
