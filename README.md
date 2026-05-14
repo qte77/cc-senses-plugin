@@ -3,7 +3,7 @@
 > Local multimodal I/O bridge for Claude Code — TTS output via `/speak`, STT input via `/listen`, screen-vision via `/see`.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-58f4c2.svg)](LICENSE)
-![Version](https://img.shields.io/badge/version-0.9.0-58f4c2.svg)
+![Version](https://img.shields.io/badge/version-0.10.0-58f4c2.svg)
 [![CodeQL](https://github.com/qte77/cc-senses-plugin/actions/workflows/codeql.yaml/badge.svg)](https://github.com/qte77/cc-senses-plugin/actions/workflows/codeql.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/qte77/cc-senses-plugin/badge)](https://www.codefactor.io/repository/github/qte77/cc-senses-plugin)
 [![Dependabot](https://github.com/qte77/cc-senses-plugin/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/qte77/cc-senses-plugin/actions/workflows/dependabot/dependabot-updates)

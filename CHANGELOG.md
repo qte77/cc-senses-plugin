@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-05-13
+
+### Changed
+
+- chore: rename plugin slug `cc-senses-bridge` → `cc-senses-plugin` to align with the canonical GitHub repo name (renamed 2026-05-13). Touches `plugin.json`, `marketplace.json`, `pyproject.toml`, all source identifier strings, Makefile recipe descriptions, docs, README, and the `~/.cache/cc-senses-bridge/` → `~/.cache/cc-senses-plugin/` cache directory paths. Python module names (`cc_tts`, `cc_stt`, `cc_vlm`, `cc_voice_common`) and the config file (`.cc-senses.toml`) are intentionally preserved — the "senses" stem stays recognizable and avoids forcing users through another config-file migration.
+
+### Migration notes
+
+- Move cached VLM models: `mv ~/.cache/cc-senses-bridge ~/.cache/cc-senses-plugin` (or re-run `make setup_see` to re-download)
+- Reinstall the plugin: `make plugin_uninstall && make plugin_install_local`
+- Install command changes to `claude plugin install cc-senses-plugin@cc-senses-plugin`
+- `.cc-senses.toml` filename is unchanged; only the header comment was updated
+
 ## [0.9.0] - 2026-05-13
 
 ### Added
