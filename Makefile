@@ -2,7 +2,8 @@
 .ONESHELL:
 .PHONY: \
 	setup setup_dev setup_espeak setup_piper setup_kokoro setup_stt \
-	setup_see setup_see_qwen25 setup_user setup_all \
+	setup_see setup_see_qwen25 setup_see_qwen3vl setup_see_smolvlm \
+	setup_user setup_all setup_default_all \
 	clean validate lint_fix quick_validate lint_src lint_tests lint_md lint_links \
 	type_check test test_coverage speak wrap \
 	vlm_server_status vlm_server_stop vlm_server_logs \
@@ -17,15 +18,9 @@ ifndef VERBOSE
   COV_QUIET    := --cov-report=
 endif
 
-# -- VLM model + llama-cpp-python wheel URLs (single source of truth) --
-# Update these vars when bumping recommended models or wheel index URLs.
-VLM_MODELS_DIR          := $(HOME)/.cache/cc-senses-plugin/models
-VLM_MOONDREAM_MODEL_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-text-model-f16_ct-q4_0.gguf
-VLM_MOONDREAM_MMPROJ_URL := https://huggingface.co/ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-mmproj-f16.gguf
-VLM_QWEN25_MODEL_URL    := https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
-VLM_QWEN25_MMPROJ_URL   := https://huggingface.co/bartowski/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf
-LLAMA_CPP_INDEX_CPU     := https://abetlen.github.io/llama-cpp-python/whl/cpu
-LLAMA_CPP_INDEX_CUDA124 := https://abetlen.github.io/llama-cpp-python/whl/cu124
+# VLM model URLs + filenames live in src/cc_vlm/models.toml — never inlined here.
+# `cc_vlm.setup_models` is the single source of truth for downloads + snippets.
+VLM_MODELS_DIR := $(HOME)/.cache/cc-senses-plugin/models
 
 
 # MARK: SETUP
@@ -59,64 +54,21 @@ setup_kokoro: ## Install Kokoro TTS (best local quality, ~82MB model)
 setup_stt: ## Install STT deps (sounddevice + default engine)
 	uv sync --extra stt
 
-setup_see: ## Install /see deps + download Moondream2 (recommended default VLM)
+setup_see: ## Install /see deps + download Moondream2 (default in-process VLM)
 	uv sync --extra see
-	mkdir -p $(VLM_MODELS_DIR)
-	model=$(VLM_MODELS_DIR)/moondream2-text-model-f16_ct-q4_0.gguf
-	mmproj=$(VLM_MODELS_DIR)/moondream2-mmproj-f16.gguf
-	if [ ! -f $$model ]; then
-		echo "Downloading Moondream2 model ..."
-		curl -fL --retry 3 -o $$model $(VLM_MOONDREAM_MODEL_URL)
-	else
-		echo "Moondream2 model already present — skipping."
-	fi
-	if [ ! -f $$mmproj ]; then
-		echo "Downloading Moondream2 mmproj ..."
-		curl -fL --retry 3 -o $$mmproj $(VLM_MOONDREAM_MMPROJ_URL)
-	else
-		echo "Moondream2 mmproj already present — skipping."
-	fi
-	echo ""
-	echo "  Now install llama-cpp-python for your hardware (NOT auto-installed):"
-	if [ "$$(uname -s)" = "Darwin" ]; then
-		echo "    CMAKE_ARGS='-DLLAMA_METAL=on' uv pip install llama-cpp-python    # macOS Metal"
-	elif command -v nvidia-smi > /dev/null 2>&1; then
-		echo "    uv pip install llama-cpp-python --extra-index-url $(LLAMA_CPP_INDEX_CUDA124)    # CUDA 12.4 detected"
-	else
-		echo "    uv pip install llama-cpp-python --extra-index-url $(LLAMA_CPP_INDEX_CPU)    # CPU"
-	fi
-	echo ""
-	echo "  Then add this to .cc-senses.toml:"
-	echo ""
-	echo "    [vlm]"
-	echo "    model_path = \"$$model\""
-	echo "    mmproj_path = \"$$mmproj\""
-	echo "    handler_name = \"moondream\""
+	uv run python -m cc_vlm.setup_models moondream
 
-setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (alt VLM, richer output)
+setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (in-process alt)
 	uv sync --extra see
-	mkdir -p $(VLM_MODELS_DIR)
-	model=$(VLM_MODELS_DIR)/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf
-	mmproj=$(VLM_MODELS_DIR)/mmproj-Qwen2.5-VL-3B-Instruct-f16.gguf
-	if [ ! -f $$model ]; then
-		echo "Downloading Qwen2.5-VL-3B model ..."
-		curl -fL --retry 3 -o $$model $(VLM_QWEN25_MODEL_URL)
-	else
-		echo "Qwen2.5-VL-3B model already present — skipping."
-	fi
-	if [ ! -f $$mmproj ]; then
-		echo "Downloading Qwen2.5-VL-3B mmproj ..."
-		curl -fL --retry 3 -o $$mmproj $(VLM_QWEN25_MMPROJ_URL)
-	else
-		echo "Qwen2.5-VL-3B mmproj already present — skipping."
-	fi
-	echo ""
-	echo "  Then add this to .cc-senses.toml:"
-	echo ""
-	echo "    [vlm]"
-	echo "    model_path = \"$$model\""
-	echo "    mmproj_path = \"$$mmproj\""
-	echo "    handler_name = \"qwen2.5vl\""
+	uv run python -m cc_vlm.setup_models qwen25vl
+
+setup_see_qwen3vl: ## Install /see deps + download Qwen3-VL-2B (llamaserver, ~1.55 GB)
+	uv sync --extra see
+	uv run python -m cc_vlm.setup_models qwen3vl
+
+setup_see_smolvlm: ## Install /see deps + download SmolVLM-500M (llamaserver, 546 MB)
+	uv sync --extra see
+	uv run python -m cc_vlm.setup_models smolvlm
 
 setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no dev tools)
 	@echo ""
@@ -134,6 +86,11 @@ setup_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt ## Develope
 	@echo "✓ cc-senses-plugin ready."
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo "  Then in Claude Code: /speak --toggle"
+
+setup_default_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt setup_see ## Kitchen-sink: dev + all TTS + STT + /see (Moondream2)
+	@echo ""
+	@echo "✓ cc-senses-plugin fully installed (default in-process VLM path)."
+	@echo "  /speak /listen /see all ready."
 
 clean: ## Remove venv + caches (preserves downloaded TTS/STT/VLM models)
 	rm -rf .venv .pytest_cache .ruff_cache .coverage
