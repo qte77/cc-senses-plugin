@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-05-13
+
+### Added
+
+- feat(vlm): `LlamaServerVLMEngine` HTTP backend — talks to `llama-server` via OpenAI-compatible API. Routes around the `abetlen/llama-cpp-python` chat-handler gap; unlocks SmolVLM2-2.2B and Qwen3-VL-2B today. (#108)
+- feat(vlm): `cc_vlm.server_manager` module — spawn / pidfile / health-probe / shutdown lifecycle helpers for the HTTP backend. (#110)
+- feat(vlm): lazy auto-spawn — `auto_spawn = true` (default) makes the first `/see` invocation spawn `llama-server` automatically when no daemon is reachable; subsequent calls are warm. (#110)
+- feat(vlm): SessionStart preload hook + SessionEnd shutdown hook — opt-in `preload = true` spawns `llama-server` in the background at CC session start so even the first `/see` is hot.
+- build(make): `vlm_server_status` / `vlm_server_stop` / `vlm_server_logs` targets for manual lifecycle control.
+- pyproject entry points: `cc-vlm-preload` (SessionStart target), `cc-vlm-shutdown` (SessionEnd target).
+- Six new `[vlm]` config fields: `server_url`, `server_model_alias`, `server_port`, `server_binary`, `auto_spawn`, `preload`.
+- `httpx>=0.27` added to `[see]` extras.
+
+### Migration notes
+
+- New `[vlm]` engine: set `engine = "llamaserver"` plus `model_path`/`mmproj_path` to use the HTTP backend. With `auto_spawn = true` (default) cc-senses-bridge starts `llama-server` itself. With `auto_spawn = false`, run `llama-server` manually.
+- `preload = true` is opt-in; default is `false`. Enable per `.cc-senses.toml` if you want the model warm from session start (costs ~1-2 GB RAM for the session lifetime).
+- Existing in-process (`llamacpp`) workflow unchanged.
+
 ## [0.8.0] - 2026-05-12
 
 ### Changed
