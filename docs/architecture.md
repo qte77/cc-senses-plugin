@@ -84,7 +84,7 @@ Engine priority (auto-detect order): `llamacpp` → `llamaserver` (in-process pr
 | Engine | Backend | Daemon | RAM idle | Latency (warm) | Notes |
 |---|---|---|---|---|---|
 | **llamacpp** (default) | llama-cpp-python | None | 0 (but cold-starts every `/see` — fresh Python process) | ~200-500 ms (within one process; rare for CLI) | In-process; no HTTP. Cold-starts on every `/see` invocation. |
-| **llamaserver** | `llama-server` HTTP | Yes (user-managed in Phase 1; lazy auto-spawn in Phase 2; preloaded in Phase 3) | ~1-2 GB while alive | ~200-500 ms (genuinely warm across `/see` calls) | Same llama.cpp binary as in-process; unlocks SmolVLM2, Qwen3-VL, and any GGUF llama.cpp supports without waiting for `abetlen/llama-cpp-python` handler PRs |
+| **llamaserver** | `llama-server` HTTP | Yes (user-managed / lazy auto-spawn / preloaded — see Server lifecycle below) | ~1-2 GB while alive | ~200-500 ms (genuinely warm across `/see` calls) | Same llama.cpp binary as in-process; unlocks SmolVLM2, Qwen3-VL, and any GGUF llama.cpp supports without waiting for `abetlen/llama-cpp-python` handler PRs |
 | ClaudeVisionEngine (deferred) | Claude Vision API | None | 0 | ~1-3 s | ~1,600 tokens/call; opt-in `--vision` |
 
 **Why `llama-server` and not Ollama**: same llama.cpp binary already used by the in-process path, no extra daemon family to support, no Ollama-as-dependency. Ollama was considered and rejected on those grounds during the #91 research pass.

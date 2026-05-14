@@ -84,8 +84,34 @@ mmproj_path = "/home/USER/.cache/cc-senses-plugin/models/moondream2-mmproj-f16.g
 handler_name = "moondream"
 ```
 
+### Hot-model variant (shipped in v0.9.0)
+
+The default `llamacpp` engine reloads the model on every `/see`
+invocation (each call is a fresh Python process — the in-process
+warm-cache benefit doesn't apply to the CLI workflow). For
+genuinely-warm latency across calls, switch to the `llamaserver`
+backend, which keeps the model resident in a long-lived
+`llama-server` daemon:
+
+```toml
+[vlm]
+engine = "llamaserver"
+model_path = "/path/to/model.gguf"
+mmproj_path = "/path/to/mmproj.gguf"
+auto_spawn = true   # default; first /see spawns llama-server in the background
+# preload = true    # opt-in: spawn at session start so even the first /see is warm
+```
+
+Three lifecycle modes — see
+[`docs/architecture.md` § Server lifecycle](architecture.md#server-lifecycle).
+The `llamaserver` engine also unlocks model families that the
+in-process backend can't reach (SmolVLM2, Qwen3-VL — anything
+`llama.cpp` supports but `abetlen/llama-cpp-python` hasn't shipped a
+chat-handler for yet).
+
 See [`docs/adr/0003-vlm-screen-sharing.md`](adr/0003-vlm-screen-sharing.md)
-for the rationale behind the in-process VLM choice.
+for the rationale behind the local-VLM choice (originally
+in-process-only; v0.9.0 added the HTTP-server alternative).
 
 ## Flow C: Hotkey-stopped playback
 
