@@ -22,7 +22,7 @@ all = [
     "cc-senses-bridge[stt]",
     "cc-senses-bridge[see]",
 ]
-dev = ["ruff>=0.15.10", "pyright>=1.1.408", "bump-my-version>=1.3.0"]
+dev = ["ruff>=0.15.10", "pyright>=1.1.409", "bump-my-version>=1.3.0"]
 test = ["pytest>=9.0.3", "pytest-cov>=6.0"]
 
 [project.scripts]
