@@ -1,4 +1,4 @@
-# cc-senses-bridge configuration
+# cc-senses-plugin configuration
 # Copy to .cc-senses.toml and adjust as needed.
 #
 # Handler-name values for [vlm] are listed in docs/architecture.md.
