@@ -1,3 +1,3 @@
-"""cc-stt: Speech-to-text module for cc-senses-bridge plugin."""
+"""cc-stt: Speech-to-text module for cc-senses-plugin plugin."""
 
 __version__ = "0.9.0"

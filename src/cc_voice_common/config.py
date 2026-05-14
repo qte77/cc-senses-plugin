@@ -1,4 +1,4 @@
-"""Shared config utilities — TOML discovery and section loading for cc-senses-bridge plugins."""
+"""Shared config utilities — TOML discovery and section loading for cc-senses-plugin plugins."""
 
 from __future__ import annotations
 

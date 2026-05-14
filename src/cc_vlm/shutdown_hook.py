@@ -1,4 +1,4 @@
-"""SessionEnd hook: stop the cc-senses-bridge-spawned llama-server.
+"""SessionEnd hook: stop the cc-senses-plugin-spawned llama-server.
 
 Registered as a Claude Code SessionEnd hook in hooks/hooks.json. Fires
 once when the CC session ends. Calls `server_manager.shutdown` with
@@ -15,7 +15,7 @@ import datetime
 import os
 from pathlib import Path
 
-_LOG_PATH = Path.home() / ".cache" / "cc-senses-bridge" / "shutdown.log"
+_LOG_PATH = Path.home() / ".cache" / "cc-senses-plugin" / "shutdown.log"
 
 
 def _debug(msg: str) -> None:
