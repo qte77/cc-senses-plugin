@@ -1,6 +1,6 @@
 [project]
 name = "cc-senses-bridge"
-version = "0.8.0"
+version = "0.9.0"
 description = "Local multimodal I/O bridge for Claude Code — TTS (/speak), STT (/listen), VLM (/see)"
 requires-python = ">=3.11"
 license = "Apache-2.0"
@@ -30,6 +30,8 @@ cc-tts = "cc_tts.speak:main"              # speak text: cc-tts "hello"  |  cc-tt
 cc-tts-wrap = "cc_tts.pty_proxy:main"     # PTY proxy: cc-tts-wrap claude (interactive, fragile)
 cc-tts-stream = "cc_tts.stream_json:main" # stream-json: cc-tts-stream "prompt" (non-interactive, robust)
 cc-tts-repl = "cc_tts.repl:main"         # REPL: cc-tts-repl (interactive stream-json + TTS)
+cc-vlm-preload = "cc_vlm.preload_hook:main"   # SessionStart hook target
+cc-vlm-shutdown = "cc_vlm.shutdown_hook:main" # SessionEnd hook target
 
 [build-system]
 requires = ["hatchling"]
@@ -94,7 +96,7 @@ exclude_lines = [
 
 
 [tool.bumpversion]
-current_version = "0.8.0"
+current_version = "0.9.0"
 commit = true
 tag = true
 tag_name = "v{new_version}"
