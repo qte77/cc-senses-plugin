@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-05-15
+
+### Fixed
+
+- All four `setup_see` / `setup_see_qwen25` URLs were dead: `ggml-org/moondream2-20250414-GGUF` never shipped the `f16_ct-q4_0.gguf` filename the Makefile asked for (only `f16_ct-vicuna` and `mmproj-f16-20250414`), and `bartowski/Qwen2.5-VL-3B-Instruct-GGUF` was removed entirely. Repointed at canonical author repos: `moondream/moondream2-gguf` (F16 only — no Q4 published at canonical source) and `lmstudio-community/Qwen2.5-VL-3B-Instruct-GGUF` (Q4_K_M).
+
+### Changed
+
+- VLM model registry pivoted to `src/cc_vlm/models.toml` + `python -m cc_vlm.setup_models <key>`. URL constants and filename literals no longer live in the Makefile — filenames are derived from URL basenames by construction, so the drift class of bug that caused the v0.10.0 dead URLs is structurally impossible going forward. Make recipes collapsed from 66 lines of shell to 12 lines of one-liners.
+
+### Added
+
+- `make setup_see_qwen3vl` — llamaserver opt-in target for Qwen3-VL-2B (official Qwen, apache-2.0, ~1.55 GB Q4_K_M text + Q8 mmproj). Reachable through `LlamaServerVLMEngine` without waiting on `abetlen/llama-cpp-python` to ship a `Qwen3VLChatHandler`.
+- `make setup_see_smolvlm` — llamaserver opt-in target for SmolVLM-500M (ggml-org, apache-2.0, 546 MB total). The "fits-on-anything" tier for low-spec laptops.
+- `make setup_default_all` — kitchen-sink: dev tools + all TTS engines + STT + the in-process default `/see` tier (Moondream2).
+- `src/cc_vlm/setup_models.py` — TOML-driven loader, downloader, and engine-aware `[vlm]` snippet emitter with platform-aware llama-cpp-python / llama-server install hints.
+
+### Migration notes
+
+- Re-run `make setup_see` (or `make clean_models && make setup_see`) to fetch the new, working Moondream2 GGUFs. Model files have new basenames: `moondream2-text-model-f16.gguf` (was `f16_ct-q4_0.gguf`) and `moondream2-mmproj-f16.gguf` (unchanged).
+- Existing `.cc-senses.toml` files keep working — config schema is unchanged. Only the `model_path` / `mmproj_path` values need to point at the new filenames if you reuse the installer's printed snippet.
+
 ## [0.10.0] - 2026-05-13
 
 ### Changed
