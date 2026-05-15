@@ -116,17 +116,23 @@ Cold start: 3-5 s (model load). Warm page cache: 1-2 s. In-process reuse: 200-50
 
 ### Supported VLM models (llama-cpp-python handlers)
 
-| handler_name | llama_cpp class | Model family |
-|---|---|---|
-| `moondream` (default) | `MoondreamChatHandler` | Moondream2 (~0.9 GB Q4, fastest CPU path) |
-| `qwen2.5vl` | `Qwen25VLChatHandler` | Qwen2.5-VL-2B/3B/7B (richer output, ~1.6 GB Q4) |
-| `llava15` | `Llava15ChatHandler` | LLaVA 1.5 |
-| `llava16` | `Llava16ChatHandler` | LLaVA 1.6 |
-| `minicpmv` | `MiniCPMv26ChatHandler` | MiniCPM-V 2.6 |
-| `nanollava` | `NanollavaChatHandler` | NanoLLaVA |
+| handler_name | llama_cpp class | Model family | Total install |
+|---|---|---|---|
+| `moondream` (default) | `MoondreamChatHandler` | Moondream2 (F16, fastest CPU path) | ~3.75 GB |
+| `qwen2.5vl` | `Qwen25VLChatHandler` | Qwen2.5-VL-3B (Q4_K_M, richer output) | ~3.27 GB |
+| `llava15` | `Llava15ChatHandler` | LLaVA 1.5 | — |
+| `llava16` | `Llava16ChatHandler` | LLaVA 1.6 | — |
+| `minicpmv` | `MiniCPMv26ChatHandler` | MiniCPM-V 2.6 | — |
+| `nanollava` | `NanollavaChatHandler` | NanoLLaVA | — |
 
-Default chosen for smallest CPU footprint; install via `make setup_see`.
-For richer output swap to `qwen2.5vl` via `make setup_see_qwen25`.
+Install paths: `make setup_see` (Moondream2, recommended) or `make setup_see_qwen25`
+(Qwen2.5-VL alt). For newer models with no in-process handler yet — Qwen3-VL-2B
+and SmolVLM-500M — use the `llamaserver` opt-in targets `make setup_see_qwen3vl`
+and `make setup_see_smolvlm`.
+
+URLs, filenames, engine routing, and the `[vlm]` snippet template all live in
+`src/cc_vlm/models.toml`; Make recipes delegate to `python -m cc_vlm.setup_models <key>`
+to avoid the URL/filename drift class of bug that shipped before v0.10.1.
 
 ### VLM token budget
 

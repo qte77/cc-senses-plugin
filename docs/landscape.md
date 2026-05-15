@@ -97,20 +97,22 @@ for full details.
 See [`docs/architecture.md` § VLM engine comparison](architecture.md#vlm-engine-comparison)
 and the supported-handlers table for full details.
 
-| handler | role | license |
-|---|---|---|
-| `moondream` (default) | Moondream2, ~0.9 GB Q4, fastest CPU path | Apache 2.0 |
-| `qwen2.5vl` | Qwen2.5-VL-2B/3B/7B, richer output, ~1.6 GB Q4 | Apache 2.0 |
-| `llava15` / `llava16` | LLaVA 1.5 / 1.6 | Apache 2.0 |
-| `minicpmv` | MiniCPM-V 2.6 | Apache 2.0 |
-| `nanollava` | NanoLLaVA | Apache 2.0 |
+| handler / target | role | total install | license |
+|---|---|---|---|
+| `moondream` (default in-process) | Moondream2 F16, fastest CPU path | ~3.75 GB | Apache 2.0 |
+| `qwen2.5vl` (in-process alt) | Qwen2.5-VL-3B Q4_K_M, richer output | ~3.27 GB | Apache 2.0 |
+| `qwen3vl` (llamaserver opt-in) | Qwen3-VL-2B Q4_K_M + Q8 mmproj | ~1.55 GB | Apache 2.0 |
+| `smolvlm` (llamaserver opt-in) | SmolVLM-500M Q8 + Q8 mmproj | 546 MB | Apache 2.0 |
+| `llava15` / `llava16` | LLaVA 1.5 / 1.6 (in-process, no `make` target) | — | Apache 2.0 |
+| `minicpmv` | MiniCPM-V 2.6 (in-process, no `make` target) | — | Apache 2.0 |
+| `nanollava` | NanoLLaVA (in-process, no `make` target) | — | Apache 2.0 |
 
 Shipped via two engine classes in `src/cc_vlm/engine.py`:
 
 - `LlamaCppVLMEngine` — in-process via llama-cpp-python (dispatched on `handler_name`).
-- `LlamaServerVLMEngine` — HTTP via llama-server (PR #107/#108; user-managed in Phase 1, lazy auto-spawn in Phase 2, SessionStart preload in Phase 3). Routes around the abetlen/llama-cpp-python handler gap and gives genuinely-warm-across-invocations latency, which the in-process backend cannot in the `/see` CLI workflow (each `/see` spawns a fresh Python process).
+- `LlamaServerVLMEngine` — HTTP via mainline llama-server (PR #107/#108; user-managed in Phase 1, lazy auto-spawn in Phase 2, SessionStart preload in Phase 3). Routes around the abetlen/llama-cpp-python handler gap and gives genuinely-warm-across-invocations latency, which the in-process backend cannot in the `/see` CLI workflow (each `/see` spawns a fresh Python process).
 
-**SmolVLM2-2.2B** and **Qwen3-VL-2B** are reachable today via the `llamaserver` engine — both are blocked on missing `*ChatHandler` classes in `abetlen/llama-cpp-python` (Qwen3-VL: upstream #2080; SmolVLM2: no handler upstream at all).
+The two `llamaserver` opt-in models (**Qwen3-VL-2B**, **SmolVLM-500M**) are shipped via `make setup_see_qwen3vl` and `make setup_see_smolvlm` as of v0.10.1. The in-process `qwen3vl` handler is still tracked at #102 (blocked on upstream `abetlen/llama-cpp-python` #2080); `LlamaServerVLMEngine` is the unblock path.
 
 ### Considered / deferred
 
@@ -118,7 +120,7 @@ To be filed as issues; placeholder list for now.
 
 | Candidate | Status | Notes |
 |---|---|---|
-| **`Qwen3VLChatHandler` for in-process backend** | deferred (tracker #102) | Blocked on [`abetlen/llama-cpp-python` #2080](https://github.com/abetlen/llama-cpp-python/issues/2080). Add `"qwen3vl"` to `_HANDLER_MAP` once the upstream class lands. Until then, `LlamaServerVLMEngine` is the unblock path. |
+| **`Qwen3VLChatHandler` for in-process backend** | deferred (tracker #102) | Blocked on [`abetlen/llama-cpp-python` #2080](https://github.com/abetlen/llama-cpp-python/issues/2080). Add `"qwen3vl"` to `_HANDLER_MAP` once the upstream class lands. Until then, `make setup_see_qwen3vl` configures the model on the `LlamaServerVLMEngine` path. |
 | **`available()` hardening for handler-class-mismatch** | deferred (tracker #103) | `engine.py:available()` only checks `handler_name in _HANDLER_MAP`, not whether the class actually exists in the installed `llama_cpp.llama_chat_format` module. Latent footgun for any new handler we add. |
 | **`ClaudeVisionEngine` fallback** | deferred (per ADR-0003 Tier 1) | Returns image path reference for Claude's built-in vision instead of running a local VLM. ~1,600 tokens/call (vs ~120 for local VLM). Opt-in `--vision` flag. |
 
