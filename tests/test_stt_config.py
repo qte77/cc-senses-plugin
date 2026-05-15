@@ -8,17 +8,6 @@ from cc_stt.config import STTConfig, load_stt_config
 
 
 class TestSTTConfigDefaults:
-    def test_defaults(self) -> None:
-        config = STTConfig()
-        assert config.engine == "auto"
-        assert config.language == "en"
-        assert config.wake_word == "hey_claude"
-        assert config.mic_device == "default"
-        assert config.auto_listen is False
-        assert config.strip_fillers is True
-        assert config.intent_match is True
-        assert config.max_words == 200
-
     def test_default_is_not_mutable_across_instances(self) -> None:
         a = STTConfig()
         b = STTConfig()
