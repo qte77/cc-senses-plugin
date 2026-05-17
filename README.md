@@ -30,11 +30,13 @@ Session summary generated with three engines for comparison:
 ## Quick Start
 
 ```bash
-make setup_default_all   # kitchen-sink: dev + all TTS + STT + /see (Moondream2)
-make help                # all other setup, validation, plugin, and run recipes
+make setup_default_all       # kitchen-sink install: dev + all TTS + STT + /see (Moondream2)
+make plugin_install_local    # register the plugin in Claude Code (project scope)
+make run_cc                  # start Claude Code with the plugin
+make help                    # other recipes (granular setup, validation, run modes)
 
-cc-tts-wrap claude       # live PTY-wrapped TTS
-cc-tts "Hello"           # one-shot CLI
+cc-tts-wrap claude           # test TTS without CC: live PTY-wrapped
+cc-tts "Hello"               # test TTS without CC: one-shot CLI
 ```
 
 ## Configuration
