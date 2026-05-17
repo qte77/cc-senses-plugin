@@ -31,13 +31,7 @@ Session summary generated with three engines for comparison:
 
 ```bash
 make setup_default_all   # kitchen-sink: dev + all TTS + STT + /see (Moondream2)
-# — or granular —
-make setup_dev           # install package + dev deps
-make setup_espeak        # install espeak-ng + mpv (zero-config baseline)
-make setup_piper         # install Piper (neural)
-make setup_kokoro        # install Kokoro (best local)
-make setup_see           # /see only: Moondream2 in-process (~3.75 GB)
-make setup_see_smolvlm   # /see only: SmolVLM-500M via llama-server (546 MB)
+make help                # all other setup, validation, plugin, and run recipes
 
 cc-tts-wrap claude       # live PTY-wrapped TTS
 cc-tts "Hello"           # one-shot CLI
