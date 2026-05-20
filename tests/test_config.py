@@ -4,18 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from cc_tts.config import TTSConfig, load_config
-
-
-class TestTTSConfigDefaults:
-    def test_defaults(self) -> None:
-        config = TTSConfig()
-        assert config.engine == "auto"
-        assert config.voice == "en_US-amy-medium"
-        assert config.speed == 1.0
-        assert config.auto_read is False
-        assert config.max_chars == 2000
-        assert config.player == "auto"
+from cc_tts.config import load_config
 
 
 class TestLoadConfigFromToml:

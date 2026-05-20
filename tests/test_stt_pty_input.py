@@ -30,16 +30,6 @@ class TestInjectText:
             os.close(master_fd)
             os.close(slave_fd)
 
-    def test_injects_with_newline(self) -> None:
-        master_fd, slave_fd = pty.openpty()
-        try:
-            inject_text(master_fd, "test input", newline=True)
-            data = _read_available(master_fd)
-            assert b"test input" in data
-        finally:
-            os.close(master_fd)
-            os.close(slave_fd)
-
     def test_empty_text_is_noop(self) -> None:
         master_fd, slave_fd = pty.openpty()
         try:

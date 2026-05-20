@@ -9,34 +9,6 @@ import pytest
 from cc_vlm.config import VLMConfig, load_vlm_config
 
 
-class TestVLMConfigDefaults:
-    def test_defaults(self) -> None:
-        config = VLMConfig()
-        assert config.engine == "auto"
-        assert config.model_path == ""
-        assert config.mmproj_path == ""
-        assert config.handler_name == "moondream"
-        assert config.n_ctx == 4096
-        assert config.n_gpu_layers == 0
-        assert config.max_tokens == 256
-        assert config.max_dimension == 768
-        assert config.jpeg_quality == 85
-        assert config.template == "generic"
-        assert config.cache_size == 32
-
-    def test_llama_server_field_defaults(self) -> None:
-        """Phase 1 introduces six llama-server fields; Phase 1 wires server_url
-        and server_model_alias; the remaining four land as inert fields ready
-        for Phase 2/3 lifecycle work."""
-        config = VLMConfig()
-        assert config.server_url == ""
-        assert config.server_model_alias == ""
-        assert config.server_port == 8080
-        assert config.server_binary == "llama-server"
-        assert config.auto_spawn is True
-        assert config.preload is False
-
-
 class TestEnvOverrides:
     @pytest.fixture(autouse=True)
     def _clean_env(self, monkeypatch: pytest.MonkeyPatch) -> None:

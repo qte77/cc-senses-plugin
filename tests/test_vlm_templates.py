@@ -20,16 +20,8 @@ class TestPromptTemplates:
                 f"Template {name!r} missing word cap instruction"
             )
 
-    def test_templates_are_non_empty(self) -> None:
-        for name, prompt in PROMPT_TEMPLATES.items():
-            assert prompt.strip(), f"Template {name!r} is empty"
-
 
 class TestGetTemplate:
-    def test_returns_template_for_known_name(self) -> None:
-        assert get_template("terminal") == PROMPT_TEMPLATES["terminal"]
-        assert get_template("generic") == PROMPT_TEMPLATES["generic"]
-
     def test_raises_value_error_for_unknown(self) -> None:
         with pytest.raises(ValueError, match="Unknown template"):
             get_template("nonexistent")

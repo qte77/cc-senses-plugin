@@ -15,7 +15,7 @@ Local multimodal I/O for Claude Code. TTS speaks Claude's responses aloud, STT c
 
 - **TTS** — `/speak` skill, Stop-hook auto-read, multi-engine (Kokoro / Piper / espeak-ng / edge-tts)
 - **STT** — `/listen` skill, Moonshine/Vosk auto-detect, mic capture with VAD, PTY injection
-- **VLM** — `/see` skill, in-process Moondream2 via llama-cpp-python (Qwen2.5-VL alt), screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
+- **VLM** — `/see` skill, four-tier model ladder (Moondream2 in-process default; Qwen2.5-VL-3B in-process alt; Qwen3-VL-2B / SmolVLM-500M via `llama-server` opt-in), screen → text into Claude's context (~120 tokens/call vs ~1,600 raw vision)
 
 ## Audio Examples
 
@@ -30,13 +30,13 @@ Session summary generated with three engines for comparison:
 ## Quick Start
 
 ```bash
-make setup_dev      # install package + dev deps
-make setup_espeak   # install espeak-ng + mpv (zero-config baseline)
-make setup_piper    # install Piper (neural)
-make setup_kokoro   # install Kokoro (best local)
+make setup_default_all       # kitchen-sink install: dev + all TTS + STT + /see (Moondream2)
+make plugin_install_local    # register the plugin in Claude Code (project scope)
+make run_cc                  # start Claude Code with the plugin
+make help                    # other recipes (granular setup, validation, run modes)
 
-cc-tts-wrap claude  # live PTY-wrapped TTS
-cc-tts "Hello"      # one-shot CLI
+cc-tts-wrap claude           # test TTS without CC: live PTY-wrapped
+cc-tts "Hello"               # test TTS without CC: one-shot CLI
 ```
 
 ## Configuration
