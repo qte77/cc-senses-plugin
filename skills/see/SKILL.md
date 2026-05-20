@@ -14,12 +14,19 @@ Capture the screen, run a local vision-language model (Moondream2 by default via
 ## Install
 
 ```bash
-make setup_see           # default: Moondream2 (~0.9 GB Q4, fastest CPU)
-# or
-make setup_see_qwen25    # alt: Qwen2.5-VL-3B (~1.6 GB Q4, richer output)
+make setup_see              # default in-process: Moondream2 F16 (~3.75 GB)
+make setup_see_qwen25       # in-process alt: Qwen2.5-VL-3B Q4_K_M (~3.27 GB)
+make setup_see_qwen3vl      # llamaserver opt-in: Qwen3-VL-2B Q4_K_M (~1.55 GB)
+make setup_see_smolvlm      # llamaserver opt-in: SmolVLM-500M Q8 (546 MB)
 ```
 
-Each target installs `--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-plugin/models/`, and prints both the matching `llama-cpp-python` install command (run it manually — hardware-specific) and the `[vlm]` snippet to drop into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml) for the full `[vlm]` schema.
+URLs, filenames, and `[vlm]` snippet shape all live in `src/cc_vlm/models.toml`; the
+Make recipes delegate to `python -m cc_vlm.setup_models <key>`. Each target installs
+`--extra see` deps, downloads the GGUF + mmproj into `~/.cache/cc-senses-plugin/models/`,
+prints the engine-specific runtime install hint (`llama-cpp-python` wheel for in-process;
+`llama-server` binary for the llamaserver tiers), and prints the `[vlm]` snippet to paste
+into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml)
+for the full `[vlm]` schema.
 
 ## Engines
 
@@ -170,4 +177,8 @@ There is **no undo for past descriptions** that were injected into a Claude Code
 
 ## Status
 
-Development — functional MVP. Ships `LlamaCppVLMEngine` only. Follow-ups (`LlamaServerVLMEngine` HTTP backend, Claude Vision opt-in, focused-window crop, auto-template detection, persistent cache) are tracked in the roadmap. See [`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).
+Development — functional MVP. Ships both `LlamaCppVLMEngine` (in-process, default)
+and `LlamaServerVLMEngine` (mainline llama-server, opt-in via `setup_see_qwen3vl` /
+`setup_see_smolvlm`). Follow-ups (Claude Vision opt-in, focused-window crop,
+auto-template detection, persistent cache) are tracked in the roadmap. See
+[`docs/adr/0003-vlm-screen-sharing.md`](../../docs/adr/0003-vlm-screen-sharing.md).

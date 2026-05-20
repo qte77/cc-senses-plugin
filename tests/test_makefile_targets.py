@@ -1,63 +1,32 @@
-"""Smoke tests for Makefile setup_* targets.
+"""Integration check: every Makefile setup_see* target must invoke
+`python -m cc_vlm.setup_models` with a key that exists in models.toml.
 
-Verifies the targets exist and dry-run-print the expected commands.
-Run via `make -n <target>`; output is parsed for required substrings.
+This is the only Makefile-level test worth keeping after the pivot — it catches
+the failure mode where someone adds a Make target but forgets the TOML stanza,
+or renames a TOML key but leaves the Make recipe stale.
+
+All other Makefile assertions (target exists, dry-run succeeds, .PHONY shape)
+are either trivial smoke checks or are subsumed by the setup_models test suite.
 """
 
 from __future__ import annotations
 
-import shutil
-import subprocess
+import re
 from pathlib import Path
 
-import pytest
+from cc_vlm.setup_models import load_models
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+MAKEFILE = REPO_ROOT / "Makefile"
+
+SETUP_MODELS_INVOCATION_RE = re.compile(r"python\s+-m\s+cc_vlm\.setup_models\s+(\S+)")
 
 
-@pytest.fixture
-def make_available() -> None:
-    if shutil.which("make") is None:
-        pytest.skip("make not available in this environment")
-
-
-def _make_dry_run(target: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["make", "-n", target],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
+def test_every_setup_models_invocation_uses_a_known_key() -> None:
+    keys_in_use = set(SETUP_MODELS_INVOCATION_RE.findall(MAKEFILE.read_text(encoding="utf-8")))
+    known_keys = set(load_models())
+    unknown = keys_in_use - known_keys
+    assert not unknown, (
+        f"Makefile invokes cc_vlm.setup_models with keys not present in models.toml: "
+        f"{sorted(unknown)}. Known keys: {sorted(known_keys)}"
     )
-
-
-class TestSetupSee:
-    def test_setup_see_target_exists(self, make_available: None) -> None:
-        result = _make_dry_run("setup_see")
-        assert result.returncode == 0, f"setup_see target missing — stderr: {result.stderr}"
-
-    def test_setup_see_runs_uv_sync_with_see_extra(self, make_available: None) -> None:
-        result = _make_dry_run("setup_see")
-        assert "uv sync --extra see" in result.stdout
-
-    def test_setup_see_references_moondream_model(self, make_available: None) -> None:
-        """Default downloads must point at Moondream2 GGUF + mmproj."""
-        result = _make_dry_run("setup_see")
-        out = result.stdout.lower()
-        assert "moondream" in out
-
-    def test_setup_see_does_not_reference_qwen25_as_default(self, make_available: None) -> None:
-        """The Qwen2.5-VL alt is in setup_see_qwen25, not the default target."""
-        result = _make_dry_run("setup_see")
-        # The dry-run output for setup_see should not pull in Qwen2.5-VL URLs.
-        assert "qwen2.5-vl" not in result.stdout.lower()
-
-
-class TestSetupSeeQwen25:
-    def test_setup_see_qwen25_target_exists(self, make_available: None) -> None:
-        result = _make_dry_run("setup_see_qwen25")
-        assert result.returncode == 0, f"setup_see_qwen25 target missing — stderr: {result.stderr}"
-
-    def test_setup_see_qwen25_references_qwen25_model(self, make_available: None) -> None:
-        result = _make_dry_run("setup_see_qwen25")
-        assert "Qwen2.5-VL" in result.stdout

@@ -57,3 +57,26 @@ the lifecycle additions.
 
 See [`docs/architecture.md` § VLM Pipeline](../architecture.md#vlm-pipeline)
 for the current state of all of this.
+
+## Update (2026-05-15) — TOML-driven model registry + llamaserver opt-in targets
+
+v0.10.1 reorganizes the install layer without changing the engine layer:
+
+- **`src/cc_vlm/models.toml`** becomes the single source of truth for VLM
+  model URLs, engine routing, and `[vlm]` snippet shape. The previous approach
+  (URL constants + hand-typed filenames in the Makefile) drifted apart in
+  practice and shipped two dead URLs by v0.10.0. Filenames are now derived
+  from URL basenames; drift is structurally impossible.
+- **`python -m cc_vlm.setup_models <key>`** replaces the per-target curl
+  loops. Make recipes shrink to one-liners. Platform-aware install hints
+  (macOS Metal / CUDA / CPU for llama-cpp-python; dnf/brew/source for
+  llama-server) move into the Python module.
+- **Two new opt-in `llamaserver` Make targets**: `setup_see_qwen3vl`
+  (Qwen3-VL-2B Q4_K_M, ~1.55 GB) and `setup_see_smolvlm` (SmolVLM-500M Q8,
+  546 MB). Default in-process tier stays on Moondream2; the Q8 mmproj on
+  the new tiers keeps the footprint small enough for low-spec laptops.
+- **`setup_default_all`** kitchen-sink target installs dev tools, all TTS
+  engines, STT, and the in-process default `/see` tier in one command.
+
+Engine default and config schema are unchanged. The `[vlm]` block emitted by
+`setup_models` matches what `cc_vlm.config.VLMConfig` already accepts.
