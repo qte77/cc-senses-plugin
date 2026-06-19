@@ -11,6 +11,8 @@
 
 Local multimodal I/O for Claude Code. TTS speaks Claude's responses aloud, STT captures voice input via Moonshine/Vosk, VLM ingests the screen and feeds it as text into Claude's context for Claude to act on.
 
+**Write-up:** the voice + vision layer of an open agentic coding harness — [An Open Agentic Coding Harness](https://qte77.github.io/open-agentic-coding-harness/).
+
 ## Features
 
 - **TTS** — `/speak` skill, Stop-hook auto-read, multi-engine (Kokoro / Piper / espeak-ng / edge-tts)
