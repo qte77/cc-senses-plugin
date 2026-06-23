@@ -5,7 +5,7 @@ description = "Local multimodal I/O bridge for Claude Code — TTS (/speak), STT
 requires-python = ">=3.11"
 license = "Apache-2.0"
 authors = [{ name = "qte77" }]
-dependencies = ["pydantic-settings>=2.9.1"]
+dependencies = ["pydantic-settings>=2.14.2"]
 
 [project.optional-dependencies]
 piper = ["piper-tts>=1.2.0"]
