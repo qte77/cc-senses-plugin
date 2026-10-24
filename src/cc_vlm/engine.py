@@ -97,7 +97,8 @@ class LlamaCppVLMEngine:
         """Check whether the engine can be used.
 
         Requires: (1) llama_cpp Python package installed,
-        (2) model_path exists, (3) mmproj_path exists.
+        (2) model_path exists, (3) mmproj_path exists, (4) handler_name
+        is known and its class exists in the installed llama_cpp.
         Does NOT actually load the model — that happens lazily on
         describe() to keep available() cheap.
         """
@@ -111,7 +112,7 @@ class LlamaCppVLMEngine:
             return False
         if self.handler_name not in _HANDLER_MAP:
             return False
-        return True
+        return _handler_class_installed(self.handler_name)
 
     def _load(self) -> Any:
         """Lazily load the Llama instance with chat handler on first call."""
@@ -412,4 +413,18 @@ def _llamacpp_unavailable_message(engine: LlamaCppVLMEngine) -> str:
     if engine.handler_name not in _HANDLER_MAP:
         known = ", ".join(sorted(_HANDLER_MAP))
         return f"Unknown handler_name: {engine.handler_name!r}. Known: {known}"
+    if not _handler_class_installed(engine.handler_name):
+        return (
+            f"Installed llama-cpp-python has no {_HANDLER_MAP[engine.handler_name]} "
+            f"(needed for handler_name {engine.handler_name!r}). "
+            "Upgrade llama-cpp-python to a release that ships it."
+        )
     return "Engine unavailable for unknown reasons."
+
+
+def _handler_class_installed(handler_name: str) -> bool:
+    """True if llama_cpp.llama_chat_format exports the class for handler_name."""
+    import importlib
+
+    lcf = importlib.import_module("llama_cpp.llama_chat_format")
+    return hasattr(lcf, _HANDLER_MAP[handler_name])
