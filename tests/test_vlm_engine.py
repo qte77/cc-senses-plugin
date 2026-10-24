@@ -171,6 +171,23 @@ class TestLlamaCppVLMEngineAvailable:
         )
         assert engine.available() is False
 
+    def test_unavailable_when_handler_class_missing_from_llama_cpp(
+        self,
+        mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],
+        tmp_path: Path,
+    ) -> None:
+        """Known handler_name whose class the installed llama-cpp-python lacks."""
+        _, fake_chat_format, _ = mock_llama_cpp
+        del fake_chat_format.MoondreamChatHandler
+        model = tmp_path / "m.gguf"
+        mmproj = tmp_path / "mm.gguf"
+        model.write_bytes(b"x")
+        mmproj.write_bytes(b"x")
+        engine = LlamaCppVLMEngine(model_path=str(model), mmproj_path=str(mmproj))
+        assert engine.available() is False
+        with pytest.raises(RuntimeError, match="MoondreamChatHandler.*Upgrade llama-cpp-python"):
+            resolve_vlm_engine("llamacpp", model_path=str(model), mmproj_path=str(mmproj))
+
     def test_available_when_all_present(
         self,
         mock_llama_cpp: tuple[MagicMock, MagicMock, MagicMock],

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `/see` in-process engine: `available()` now checks that the installed `llama-cpp-python` exports the chat-handler class for `handler_name`, and the error says to upgrade, instead of crashing with `AttributeError` on the first `describe()` (#103).
+
 ## [0.10.1] - 2026-05-15
 
 ### Fixed
