@@ -146,7 +146,7 @@ make plugin_uninstall                # removes plugin + marketplace when done
 ## Implementation
 
 ```bash
-python -m cc_vlm $ARGUMENTS
+uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_vlm $ARGUMENTS
 ```
 
 ## Configuration

@@ -19,7 +19,7 @@ Transcribe speech using local speech-to-text.
 ## Implementation
 
 ```bash
-python -m cc_stt $ARGUMENTS
+uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_stt $ARGUMENTS
 ```
 
 ## Configuration

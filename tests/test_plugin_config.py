@@ -183,3 +183,31 @@ class TestVersionConsistency:
                         f"vs marketplace.json={mp_version}"
                     )
                 break
+
+
+# --- Plugin-root resolution (#106) ---
+
+UV_PROJECT_PREFIX = 'uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_'
+PYTHON_MODULE_RE = re.compile(r"^.*python -m cc_.*$", re.MULTILINE)
+
+
+class TestCommandsResolveAgainstPluginRoot:
+    """Hooks and skills run with the consumer's cwd; a bare `uv run` or `python`
+    resolves the consumer's venv, which has no cc_* modules installed."""
+
+    def test_hook_commands_pin_plugin_project(self) -> None:
+        hooks = json.loads((REPO_ROOT / "hooks" / "hooks.json").read_text())["hooks"]
+        commands = [h["command"] for groups in hooks.values() for g in groups for h in g["hooks"]]
+        assert commands
+        for command in commands:
+            assert command.startswith(UV_PROJECT_PREFIX), command
+
+    @pytest.mark.parametrize("skill", ["speak", "listen", "see"])
+    def test_skill_commands_pin_plugin_project(self, skill: str) -> None:
+        text = (REPO_ROOT / "skills" / skill / "SKILL.md").read_text()
+        runnable = [
+            line.strip() for line in PYTHON_MODULE_RE.findall(text) if "`" not in line
+        ]
+        assert runnable, f"no runnable python -m line in skills/{skill}/SKILL.md"
+        for line in runnable:
+            assert line.startswith(UV_PROJECT_PREFIX), line
