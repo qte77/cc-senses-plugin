@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- A malformed, unreadable or invalid `.cc-senses.toml` now makes the `cc_tts` / `cc_stt` / `cc_vlm` CLIs print one line (e.g. `cc_vlm: .cc-senses.toml: Cannot declare ('vlm',) twice ...`) and exit 1, instead of a traceback. Hooks still fail silently so they never block Claude Code (#120).
+
 ## [0.10.1] - 2026-05-15
 
 ### Fixed

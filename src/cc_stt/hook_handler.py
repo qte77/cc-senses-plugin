@@ -13,5 +13,5 @@ def should_auto_listen() -> bool:
     try:
         config = load_stt_config()
         return config.auto_listen
-    except Exception:
+    except (Exception, SystemExit):
         return False
