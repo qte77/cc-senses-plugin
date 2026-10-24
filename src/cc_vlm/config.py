@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
-from cc_voice_common.config import load_toml_section
+from cc_voice_common.config import build_config_or_die
 
 
 class VLMConfig(BaseSettings):
@@ -61,4 +61,4 @@ class VLMConfig(BaseSettings):
 
 def load_vlm_config() -> VLMConfig:
     """Load VLM config from [vlm] section of .cc-senses.toml with env var overrides."""
-    return VLMConfig(**load_toml_section("vlm"))
+    return build_config_or_die(VLMConfig, "vlm", "cc_vlm")

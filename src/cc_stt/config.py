@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
-from cc_voice_common.config import load_toml_section
+from cc_voice_common.config import build_config_or_die
 
 
 class STTConfig(BaseSettings):
@@ -39,4 +39,4 @@ class STTConfig(BaseSettings):
 
 def load_stt_config() -> STTConfig:
     """Load STT config from [stt] section of .cc-senses.toml with env var overrides."""
-    return STTConfig(**load_toml_section("stt"))
+    return build_config_or_die(STTConfig, "stt", "cc_stt")

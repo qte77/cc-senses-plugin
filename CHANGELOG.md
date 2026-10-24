@@ -6,6 +6,7 @@
 
 - `/see` in-process engine: `available()` now checks that the installed `llama-cpp-python` exports the chat-handler class for `handler_name`, and the error says to upgrade, instead of crashing with `AttributeError` on the first `describe()` (#103).
 - Hooks and the `/speak`, `/listen`, `/see` skills now run `uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_*`, so they resolve the plugin's own environment instead of the consuming project's venv (`ModuleNotFoundError: No module named 'cc_tts'`) (#106).
+- A malformed, unreadable or invalid `.cc-senses.toml` now makes the `cc_tts` / `cc_stt` / `cc_vlm` CLIs print one line (e.g. `cc_vlm: .cc-senses.toml: Cannot declare ('vlm',) twice ...`) and exit 1, instead of a traceback. Hooks still fail silently so they never block Claude Code (#120).
 
 ## [0.10.1] - 2026-05-15
 
