@@ -31,7 +31,7 @@ max_words = 200              # Hard word cap on transcriptions
 # CC_VLM_N_GPU_LAYERS, CC_VLM_MAX_TOKENS, CC_VLM_MAX_DIMENSION,
 # CC_VLM_JPEG_QUALITY, CC_VLM_TEMPLATE, CC_VLM_CACHE_SIZE,
 # CC_VLM_SERVER_URL, CC_VLM_SERVER_MODEL_ALIAS, CC_VLM_SERVER_PORT,
-# CC_VLM_SERVER_BINARY, CC_VLM_AUTO_SPAWN, CC_VLM_PRELOAD)
+# CC_VLM_SERVER_BINARY, CC_VLM_AUTO_SPAWN, CC_VLM_PRELOAD, CC_VLM_CAPTURE_BACKEND)
 [vlm]
 engine = "auto"              # "auto" | "llamacpp" | "llamaserver"
 model_path = ""              # Absolute path to .gguf vision model (set by `make setup_see`)
@@ -46,6 +46,9 @@ max_dimension = 768          # Resize longest edge before VLM (tokens ∝ dimens
 jpeg_quality = 85
 template = "generic"         # Default template if --template not passed
 cache_size = 32              # Per-invocation LRU entries
+capture_backend = "auto"     # "auto" | "screencapture" | "grim" | "gnome-screenshot" | "spectacle"
+                             # | "scrot" | "flameshot" | "mss". Native tools grab the primary/focused
+                             # display and ignore --monitor; only mss honours it.
 
 # llama-server HTTP backend (alternative to llama-cpp-python in-process).
 # Routes around the llama-cpp-python chat-handler gap (Qwen3-VL, SmolVLM2).

@@ -67,7 +67,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _capture_and_save(config: VLMConfig, monitor: int) -> Path:
-    capture = ScreenCapture()
+    capture = ScreenCapture(config.capture_backend)
     img = capture.grab(monitor=monitor)
     img = resize_for_vlm(img, max_edge=config.max_dimension)
     with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:

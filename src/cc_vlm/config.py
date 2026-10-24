@@ -36,6 +36,9 @@ class VLMConfig(BaseSettings):
     jpeg_quality: int = 85
     template: str = "generic"
     cache_size: int = 32
+    # Screen capture: auto | screencapture | grim | gnome-screenshot |
+    # spectacle | scrot | flameshot | mss (see cc_vlm.capture).
+    capture_backend: str = "auto"
     # llama-server HTTP backend (Phase 1 wires server_url + alias;
     # remaining fields are inert until Phase 2 lifecycle work lands).
     server_url: str = ""

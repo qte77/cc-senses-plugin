@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `/see` screen capture picks a native tool before `mss` (`screencapture`, `grim`, `gnome-screenshot`, `spectacle`, `scrot`, `flameshot`), chosen by platform and Wayland/X11 desktop, so capture works on Wayland where `mss` fails. New `[vlm] capture_backend` (env `CC_VLM_CAPTURE_BACKEND`, default `auto`) forces one backend. Native tools ignore `--monitor` (#119).
+
 ## [0.10.1] - 2026-05-15
 
 ### Fixed
