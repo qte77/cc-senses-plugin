@@ -11,6 +11,7 @@
 ### Added
 
 - `python -m cc_vlm.setup_models <key> --install-runtime/-i` installs the platform-matching `llama-cpp-python` wheel (or checks `llama-server` is on `PATH`); `CC_VLM_LLAMA_CPP_INDEX` overrides the detected wheel index. `--write-config/-w` adds the `[vlm]` snippet to `./.cc-senses.toml` — created, appended, or left alone when identical; a different existing `[vlm]` is never overwritten and the snippet goes to `.cc-senses.toml.proposed` (#118).
+- `/see` screen capture picks a native tool before `mss` (`screencapture`, `grim`, `gnome-screenshot`, `spectacle`, `scrot`, `flameshot`), chosen by platform and Wayland/X11 desktop, so capture works on Wayland where `mss` fails. New `[vlm] capture_backend` (env `CC_VLM_CAPTURE_BACKEND`, default `auto`) forces one backend. Native tools ignore `--monitor` (#119).
 
 ## [0.10.1] - 2026-05-15
 

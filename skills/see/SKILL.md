@@ -118,8 +118,23 @@ The SessionEnd hook (`cc-vlm-shutdown`) terminates the spawned server automatica
 - `/see --template generic` — free-form ≤100-word description
 - `/see --no-cache` — bypass frame-hash cache; always call the VLM
 - `/see --save-only` — capture + save JPEG, print the path, don't call the VLM
-- `/see --monitor N` — capture specific monitor (default 1 = primary)
-- `/see --image-file PATH` — describe a pre-captured image instead of capturing the screen. Use for saved screenshots, CI/headless runs, or environments where mss cannot access a display.
+- `/see --monitor N` — capture specific monitor (default 1 = primary; `mss` backend only)
+- `/see --image-file PATH` — describe a pre-captured image instead of capturing the screen. Use for saved screenshots, CI/headless runs, or environments where no capture backend can access a display.
+
+### Screen capture backends
+
+`[vlm] capture_backend` (env `CC_VLM_CAPTURE_BACKEND`) picks the capture tool. `auto` (default) probes by platform and session, skips tools not on `PATH`, falls through to the next backend if one fails, and ends with `mss`:
+
+| Platform / session | Probed in order |
+|---|---|
+| macOS | `screencapture`, `mss` |
+| Linux Wayland + GNOME | `flameshot`, `gnome-screenshot`, `mss` |
+| Linux Wayland + KDE | `spectacle`, `flameshot`, `mss` |
+| Linux Wayland + Sway / Hyprland | `grim`, `flameshot`, `mss` |
+| Linux X11 | `scrot`, `flameshot`, `gnome-screenshot`, `mss` |
+| Anything else | `mss` |
+
+Setting a specific backend uses only that tool: if it isn't on `PATH` or fails, `/see` reports the error instead of falling back. Native tools grab the primary or focused display and ignore `--monitor`; `mss` can't capture on Wayland (`XGetImage() failed`). The first portal-based capture after login (flameshot, spectacle, gnome-screenshot) can take 0.5–1.5 s.
 
 ## Local testing without Claude Code
 
