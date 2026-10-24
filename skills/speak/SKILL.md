@@ -19,7 +19,7 @@ Speak text aloud using local text-to-speech.
 ## Implementation
 
 ```bash
-uv run python -m cc_tts.speak $ARGUMENTS
+uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_tts.speak $ARGUMENTS
 ```
 
 ## Configuration

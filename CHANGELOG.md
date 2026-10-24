@@ -5,6 +5,7 @@
 ### Fixed
 
 - `/see` in-process engine: `available()` now checks that the installed `llama-cpp-python` exports the chat-handler class for `handler_name`, and the error says to upgrade, instead of crashing with `AttributeError` on the first `describe()` (#103).
+- Hooks and the `/speak`, `/listen`, `/see` skills now run `uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_*`, so they resolve the plugin's own environment instead of the consuming project's venv (`ModuleNotFoundError: No module named 'cc_tts'`) (#106).
 
 ## [0.10.1] - 2026-05-15
 
