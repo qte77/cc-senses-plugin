@@ -17,6 +17,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 import pytest
+
 from cc_vlm.setup_models import (
     MODELS_TOML,
     ModelSpec,
