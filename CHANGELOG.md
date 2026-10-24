@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `python -m cc_vlm.setup_models <key> --install-runtime/-i` installs the platform-matching `llama-cpp-python` wheel (or checks `llama-server` is on `PATH`); `CC_VLM_LLAMA_CPP_INDEX` overrides the detected wheel index. `--write-config/-w` adds the `[vlm]` snippet to `./.cc-senses.toml` — created, appended, or left alone when identical; a different existing `[vlm]` is never overwritten and the snippet goes to `.cc-senses.toml.proposed` (#118).
+
 ## [0.10.1] - 2026-05-15
 
 ### Fixed
