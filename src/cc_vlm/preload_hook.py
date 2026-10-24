@@ -41,7 +41,7 @@ def main() -> None:
     _debug("preload hook fired")
     try:
         config = load_vlm_config()
-    except Exception as exc:  # noqa: BLE001
+    except (Exception, SystemExit) as exc:  # noqa: BLE001
         # Reason: pydantic-settings or VLM deps may not be installed for
         # team members who don't use /see. Silent no-op is the right
         # failure mode — never block CC session startup.
@@ -83,7 +83,7 @@ def run_preload_sync() -> None:
     """
     try:
         config = load_vlm_config()
-    except Exception:  # noqa: BLE001
+    except (Exception, SystemExit):  # noqa: BLE001
         return
     if not config.model_path or not config.mmproj_path:
         return

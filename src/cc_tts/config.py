@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
-from cc_voice_common.config import load_toml_section
+from cc_voice_common.config import build_config_or_die
 
 
 class TTSConfig(BaseSettings):
@@ -37,4 +37,4 @@ class TTSConfig(BaseSettings):
 
 def load_config() -> TTSConfig:
     """Load config from .cc-senses.toml [tts] section with env var overrides."""
-    return TTSConfig(**load_toml_section("tts"))
+    return build_config_or_die(TTSConfig, "tts", "cc_tts")

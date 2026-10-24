@@ -71,7 +71,7 @@ def main() -> None:
 
     try:
         config = load_config()
-    except Exception as exc:
+    except (Exception, SystemExit) as exc:
         _debug(f"config error: {exc}")
         # Config or TTS modules not available — deps not installed.
         return
