@@ -1,0 +1,27 @@
+---
+name: Publish Release
+
+# Thin caller: create the GitHub Release for a tag, with notes from the
+# CHANGELOG.md "## [version]" block. Run after tag-release.yaml has tagged.
+# Aborts if the Release already exists; never overwrites.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish (empty = latest v* tag)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    uses: qte77/.github/.github/workflows/publish-release.yml@86d329865ce47b43b6e745084c92032b41dcab1b  # 2026-10-24
+    permissions:
+      contents: write
+    with:
+      tag: ${{ inputs.tag }}
+...

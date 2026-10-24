@@ -1,0 +1,21 @@
+---
+name: Tag Release
+
+# Thin caller: when a merged bump changes the version in pyproject.toml, create
+# the annotated v{version} tag. Exits 0 when the version is unchanged; never
+# deletes or overwrites an existing tag.
+
+on:
+  push:
+    branches: [main]
+    paths: [pyproject.toml]
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    uses: qte77/.github/.github/workflows/tag-release.yml@86d329865ce47b43b6e745084c92032b41dcab1b  # 2026-10-24
+    permissions:
+      contents: write
+...
