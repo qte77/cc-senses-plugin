@@ -8,6 +8,10 @@
 - Hooks and the `/speak`, `/listen`, `/see` skills now run `uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_*`, so they resolve the plugin's own environment instead of the consuming project's venv (`ModuleNotFoundError: No module named 'cc_tts'`) (#106).
 - A malformed, unreadable or invalid `.cc-senses.toml` now makes the `cc_tts` / `cc_stt` / `cc_vlm` CLIs print one line (e.g. `cc_vlm: .cc-senses.toml: Cannot declare ('vlm',) twice ...`) and exit 1, instead of a traceback. Hooks still fail silently so they never block Claude Code (#120).
 
+### Added
+
+- `python -m cc_vlm.setup_models <key> --install-runtime/-i` installs the platform-matching `llama-cpp-python` wheel (or checks `llama-server` is on `PATH`); `CC_VLM_LLAMA_CPP_INDEX` overrides the detected wheel index. `--write-config/-w` adds the `[vlm]` snippet to `./.cc-senses.toml` — created, appended, or left alone when identical; a different existing `[vlm]` is never overwritten and the snippet goes to `.cc-senses.toml.proposed` (#118).
+
 ## [0.10.1] - 2026-05-15
 
 ### Fixed
