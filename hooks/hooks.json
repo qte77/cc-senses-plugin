@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python -m cc_tts.hook_handler",
+            "command": "uv run --project \"${CLAUDE_PLUGIN_ROOT}\" python -m cc_tts.hook_handler",
             "timeout": 30
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python -m cc_vlm.preload_hook",
+            "command": "uv run --project \"${CLAUDE_PLUGIN_ROOT}\" python -m cc_vlm.preload_hook",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run python -m cc_vlm.shutdown_hook",
+            "command": "uv run --project \"${CLAUDE_PLUGIN_ROOT}\" python -m cc_vlm.shutdown_hook",
             "timeout": 5
           }
         ]
