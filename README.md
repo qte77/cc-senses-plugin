@@ -32,7 +32,7 @@ Session summary generated with three engines for comparison:
 ## Quick Start
 
 ```bash
-make setup_default_all       # kitchen-sink install: dev + all TTS + STT + /see (Moondream2)
+make setup_default_all       # kitchen-sink install: dev + all TTS + STT + /see (Moondream2 + llama-cpp-python)
 make plugin_install_local    # register the plugin in Claude Code (project scope)
 make run_cc                  # start Claude Code with the plugin
 make help                    # other recipes (granular setup, validation, run modes)

@@ -46,28 +46,28 @@ setup_espeak: ## Install espeak-ng + mpv (minimal, robotic TTS fallback)
 	fi
 
 setup_piper: ## Install Piper TTS (neural, good quality, ~60MB model)
-	uv sync --extra piper
+	uv sync --inexact --extra piper
 
 setup_kokoro: ## Install Kokoro TTS (best local quality, ~82MB model)
 	uv tool install git+https://github.com/nazdridoy/kokoro-tts
 
 setup_stt: ## Install STT deps (sounddevice + default engine)
-	uv sync --extra stt
+	uv sync --inexact --extra stt
 
 setup_see: ## Install /see deps + download Moondream2 (default in-process VLM)
-	uv sync --extra see
+	uv sync --inexact --extra see
 	uv run python -m cc_vlm.setup_models moondream
 
 setup_see_qwen25: ## Install /see deps + download Qwen2.5-VL-3B (in-process alt)
-	uv sync --extra see
+	uv sync --inexact --extra see
 	uv run python -m cc_vlm.setup_models qwen25vl
 
 setup_see_qwen3vl: ## Install /see deps + download Qwen3-VL-2B (llamaserver, ~1.55 GB)
-	uv sync --extra see
+	uv sync --inexact --extra see
 	uv run python -m cc_vlm.setup_models qwen3vl
 
 setup_see_smolvlm: ## Install /see deps + download SmolVLM-500M (llamaserver, 546 MB)
-	uv sync --extra see
+	uv sync --inexact --extra see
 	uv run python -m cc_vlm.setup_models smolvlm
 
 setup_user: setup setup_kokoro ## End user minimum: package + best local TTS (no dev tools)
@@ -87,7 +87,9 @@ setup_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt ## Develope
 	@echo "  Try: cc-tts 'hello from claude code'"
 	@echo "  Then in Claude Code: /speak --toggle"
 
-setup_default_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt setup_see ## Kitchen-sink: dev + all TTS + STT + /see (Moondream2)
+setup_default_all: setup_dev setup_espeak setup_piper setup_kokoro setup_stt ## Kitchen-sink: dev + all TTS + STT + /see (Moondream2 + llama-cpp-python runtime)
+	uv sync --inexact --extra see
+	uv run python -m cc_vlm.setup_models moondream --install-runtime
 	@echo ""
 	@echo "✓ cc-senses-plugin fully installed (default in-process VLM path)."
 	@echo "  /speak /listen /see all ready."
