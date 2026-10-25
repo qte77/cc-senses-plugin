@@ -26,7 +26,16 @@ Make recipes delegate to `python -m cc_vlm.setup_models <key>`. Each target inst
 prints the engine-specific runtime install hint (`llama-cpp-python` wheel for in-process;
 `llama-server` binary for the llamaserver tiers), and prints the `[vlm]` snippet to paste
 into `.cc-senses.toml`. See [`.cc-senses.example.toml`](../../.cc-senses.example.toml)
-for the full `[vlm]` schema.
+for the full `[vlm]` schema. `make setup_default_all` also installs the runtime
+(`--install-runtime`).
+
+`.cc-senses.toml` is found by walking up from the directory Claude Code runs in, so write
+the `[vlm]` snippet from your own project (the current directory), not from the plugin
+checkout:
+
+```bash
+uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_vlm.setup_models moondream --write-config
+```
 
 ## Engines
 
