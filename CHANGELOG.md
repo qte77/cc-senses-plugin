@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-09
+
 ### Fixed
 
 - `.claude/settings.json`: multi-colon `Bash(...)` rules such as `Bash(git:add:*)` never matched,
