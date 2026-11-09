@@ -4,6 +4,11 @@
 
 ### Fixed
 
+- `.claude/settings.json`: multi-colon `Bash(...)` rules such as `Bash(git:add:*)` never matched,
+  since `:*` is only a trailing wildcard; they are rewritten in space form. Following the
+  qte77/claude-code-plugins#183 template decision, `git commit` is allowed and `git push` now asks
+  (its old deny was never enforced). Read-command denies (`cat`, `find`, `grep`, `head`, `ls`,
+  `tail`) are removed.
 - `/see` in-process engine: `available()` now checks that the installed `llama-cpp-python` exports the chat-handler class for `handler_name`, and the error says to upgrade, instead of crashing with `AttributeError` on the first `describe()` (#103).
 - Hooks and the `/speak`, `/listen`, `/see` skills now run `uv run --project "${CLAUDE_PLUGIN_ROOT}" python -m cc_*`, so they resolve the plugin's own environment instead of the consuming project's venv (`ModuleNotFoundError: No module named 'cc_tts'`) (#106).
 - A malformed, unreadable or invalid `.cc-senses.toml` now makes the `cc_tts` / `cc_stt` / `cc_vlm` CLIs print one line (e.g. `cc_vlm: .cc-senses.toml: Cannot declare ('vlm',) twice ...`) and exit 1, instead of a traceback. Hooks still fail silently so they never block Claude Code (#120).
