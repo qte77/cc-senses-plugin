@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   bump:
-    uses: qte77/.github/.github/workflows/bump-version.yml@86d329865ce47b43b6e745084c92032b41dcab1b  # 2026-10-24
+    uses: qte77/.github/.github/workflows/bump-version.yml@43ad1211e962f82fab823377dcc7272054d8196c  # 2026-11-11
     permissions:
       contents: write
       pull-requests: write

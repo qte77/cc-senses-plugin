@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Release workflows re-pinned to `qte77/.github@43ad121`. `tag-release` now also publishes the GitHub Release for a new tag in the same run, chained on the reusable's new `tag` output, so a merged bump no longer needs a manual `publish-release` dispatch (it stays as a retry). Upstream, the bump commit is now created through `createCommitOnBranch`, so GitHub signs it; the new optional App-token inputs stay unset.
+
 ## [0.11.0] - 2026-11-09
 
 ### Fixed
