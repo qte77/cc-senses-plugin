@@ -7,6 +7,10 @@
 - README links [vlm-toolkit](https://github.com/qte77/vlm-toolkit), which started from copies of `cc_vlm` modules.
 - Release workflows re-pinned to `qte77/.github@43ad121`. `tag-release` now also publishes the GitHub Release for a new tag in the same run, chained on the reusable's new `tag` output, so a merged bump no longer needs a manual `publish-release` dispatch (it stays as a retry). Upstream, the bump commit is now created through `createCommitOnBranch`, so GitHub signs it; the new optional App-token inputs stay unset.
 
+### Security
+
+- certifi bumped to 2026.10.23 in uv.lock (GHSA-6q48-6c7w-9gw2, Dependabot alert #82)
+
 ## [0.11.0] - 2026-11-09
 
 ### Fixed
