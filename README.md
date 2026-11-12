@@ -61,6 +61,7 @@ Provides `/speak`, `/listen`, `/see` skills and Stop-hook auto-read.
 - [ADRs](docs/adr/) — decision records (TTS modes, STT engines, VLM screen-sharing)
 - [Roadmap](docs/roadmap/v0.5.x.md) — deferred ideas and rejected paths
 - [Contributing](CONTRIBUTING.md) — setup, conventions, commit style
+- Related: [vlm-toolkit](https://github.com/qte77/vlm-toolkit) — headless VLM + object-detector library for robotics and CLI use; its image processor, `llama-server` manager and VLM model list started as copies from `src/cc_vlm/` here (credited in its `NOTICE`), while `/see` keeps its own `cc_vlm/`
 
 ## Development
 
