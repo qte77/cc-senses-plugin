@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-14
+
 ### Changed
 
 - README links [vlm-toolkit](https://github.com/qte77/vlm-toolkit), which started from copies of `cc_vlm` modules.
