@@ -120,7 +120,7 @@ def main() -> None:
         sys.stdout.flush()
 
     try:
-        assert proc.stdout is not None
+        assert proc.stdout is not None  # noqa: S101 -- Popen(..., PIPE) guarantees the pipe; narrows the type
         consume_stream(
             proc.stdout,
             on_sentence=lambda _: None,

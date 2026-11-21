@@ -158,8 +158,8 @@ def main() -> None:
     auto_read = config.auto_read
 
     proc = _start_claude()
-    assert proc.stdin is not None
-    assert proc.stdout is not None
+    assert proc.stdin is not None  # noqa: S101 -- Popen(..., PIPE) guarantees the pipe; narrows the type
+    assert proc.stdout is not None  # noqa: S101 -- Popen(..., PIPE) guarantees the pipe; narrows the type
 
     tts_q: queue.Queue[str | None] = queue.Queue()
     tts_thread = threading.Thread(

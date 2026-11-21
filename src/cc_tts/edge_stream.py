@@ -156,7 +156,7 @@ def _stream_edge(text: str, *, voice: str, speed: float) -> None:
     )
 
     async def _stream() -> None:
-        assert proc.stdin is not None
+        assert proc.stdin is not None  # noqa: S101 -- Popen(..., PIPE) guarantees the pipe; narrows the type
         communicate = edge_tts.Communicate(text, tts_voice, rate=rate_str)
         async for chunk in communicate.stream():
             if chunk["type"] == "audio" and "data" in chunk:
