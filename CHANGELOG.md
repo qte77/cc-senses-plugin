@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Security
+
+- Ruff `S` (bandit-equivalent) rules enabled (#124). Tests ignore `S101`/`S108`; `src/` ignores `S603`/`S607` (fixed argv, no shell), matching `.bandit`; three model downloads from fixed https bases and four `Popen` pipe type-narrowing asserts carry inline `noqa` with the reason.
+
 ## [0.11.1] - 2026-11-14
 
 ### Changed

@@ -103,8 +103,8 @@ class PiperEngine:
         dest_dir.mkdir(parents=True, exist_ok=True)
         dest = dest_dir / onnx_name
         dest_json = dest_dir / f"{onnx_name}.json"
-        urllib.request.urlretrieve(url, dest)
-        urllib.request.urlretrieve(json_url, dest_json)
+        urllib.request.urlretrieve(url, dest)  # noqa: S310 -- fixed https base URL
+        urllib.request.urlretrieve(json_url, dest_json)  # noqa: S310 -- fixed https base URL
         return str(dest)
 
     def synthesize(
@@ -149,7 +149,7 @@ class KokoroEngine:
                 import urllib.request
 
                 url = f"{_KOKORO_RELEASE_BASE}/{fname}"
-                urllib.request.urlretrieve(url, dest)
+                urllib.request.urlretrieve(url, dest)  # noqa: S310 -- fixed https base URL
         return model_dir
 
     def synthesize(
