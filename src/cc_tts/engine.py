@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import tempfile
@@ -58,6 +59,7 @@ _PIPER_MODEL_DIRS = [
     Path(tempfile.gettempdir()) / "piper-models",
 ]
 
+_PIPER_VOICE_RE = re.compile(r"[A-Za-z]{2,3}_[A-Za-z]{2}-[A-Za-z0-9_]+-(?:x_low|low|medium|high)")
 _PIPER_HF_BASE = "https://huggingface.co/rhasspy/piper-voices/resolve/main"
 
 
@@ -76,6 +78,11 @@ class PiperEngine:
         """Resolve voice name to .onnx model path, downloading if needed."""
         if voice.endswith(".onnx") and Path(voice).exists():
             return voice
+
+        # Plain published voice names only: no separators or `..` may reach the model path or URL.
+        if not _PIPER_VOICE_RE.fullmatch(voice):
+            msg = f"Cannot resolve Piper voice: {voice}. Provide full .onnx path."
+            raise RuntimeError(msg)
 
         onnx_name = f"{voice}.onnx"
         for model_dir in _PIPER_MODEL_DIRS:

@@ -11,6 +11,7 @@
 
 ### Security
 
+- `PiperEngine._resolve_model` accepts only plain published voice names (`lang_REGION-speaker-quality`) before building the model path or download URL; a `voice` with separators, `..` or an absolute path raises "Cannot resolve Piper voice" instead of writing outside the model directory (#163).
 - Ruff `S` (bandit-equivalent) rules enabled (#124). Tests ignore `S101`/`S108`; `src/` ignores `S603`/`S607` (fixed argv, no shell), matching `.bandit`; three model downloads from fixed https bases and four `Popen` pipe type-narrowing asserts carry inline `noqa` with the reason.
 
 ## [0.11.1] - 2026-11-14
