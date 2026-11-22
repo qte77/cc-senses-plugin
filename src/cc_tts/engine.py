@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import tempfile
@@ -77,6 +78,12 @@ class PiperEngine:
         if voice.endswith(".onnx") and Path(voice).exists():
             return voice
 
+        # Speaker names can contain Unicode (e.g. pt_PT-tugão-medium), but
+        # auto-download names must never supply a directory or absolute path.
+        if not re.fullmatch(r"[A-Za-z]{2,3}_[A-Za-z]{2}-\w+-(?:x_low|low|medium|high)", voice):
+            msg = f"Cannot resolve Piper voice: {voice}. Provide full .onnx path."
+            raise RuntimeError(msg)
+
         onnx_name = f"{voice}.onnx"
         for model_dir in _PIPER_MODEL_DIRS:
             candidate = model_dir / onnx_name
@@ -85,17 +92,10 @@ class PiperEngine:
 
         # Auto-download to first writable dir
         # Voice path: en/en_US/amy/medium/en_US-amy-medium.onnx
-        parts = voice.split("-")
-        if len(parts) >= 3:
-            lang = parts[0]  # en_US
-            lang_short = lang.split("_")[0]  # en
-            speaker = parts[1]  # amy
-            quality = parts[2]  # medium
-            url = f"{_PIPER_HF_BASE}/{lang_short}/{lang}/{speaker}/{quality}/{onnx_name}"
-            json_url = f"{url}.json"
-        else:
-            msg = f"Cannot resolve Piper voice: {voice}. Provide full .onnx path."
-            raise RuntimeError(msg)
+        lang, speaker, quality = voice.split("-")
+        lang_short = lang.split("_")[0]
+        url = f"{_PIPER_HF_BASE}/{lang_short}/{lang}/{speaker}/{quality}/{onnx_name}"
+        json_url = f"{url}.json"
 
         import urllib.request
 
