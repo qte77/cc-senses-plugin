@@ -50,6 +50,79 @@ class TestEspeakEngine:
 
 
 class TestPiperEngine:
+    @pytest.mark.parametrize(
+        "voice",
+        [
+            "../en_US-amy-medium",
+            "/tmp/x-a-b",
+            "../../../../tmp/x-a-b",
+            "en_US-amy/other-medium",
+            r"en_US-amy\other-medium",
+            r"C:\tmp\en_US-amy-medium",
+            "en_US-amy-medium-extra",
+            "en_US-amy-medium\n",
+            "en_US-amy-unknown",
+            "",
+        ],
+    )
+    def test_resolve_rejects_invalid_names(self, voice: str, tmp_path: Path) -> None:
+        model_dir = tmp_path / "models"
+        with (
+            patch("cc_tts.engine._PIPER_MODEL_DIRS", [model_dir]),
+            patch("urllib.request.urlretrieve") as download,
+        ):
+            with pytest.raises(RuntimeError, match="Cannot resolve Piper voice"):
+                PiperEngine._resolve_model(voice)
+        download.assert_not_called()
+        assert not model_dir.exists()
+
+    def test_resolve_rejects_traversal_to_cached_model(self, tmp_path: Path) -> None:
+        model_dir = tmp_path / "models"
+        model_dir.mkdir()
+        (tmp_path / "en_US-amy-medium.onnx").touch()
+        with patch("cc_tts.engine._PIPER_MODEL_DIRS", [model_dir]):
+            with pytest.raises(RuntimeError, match="Cannot resolve Piper voice"):
+                PiperEngine._resolve_model("../en_US-amy-medium")
+
+    @pytest.mark.parametrize(
+        "voice",
+        [
+            "en_US-amy-medium",
+            "pt_PT-tugão-medium",
+            "vi_VN-vais1000-medium",
+            "en_US-libritts_r-medium",
+            "en_US-amy-x_low",
+        ],
+    )
+    def test_resolve_downloads_plain_names(self, voice: str, tmp_path: Path) -> None:
+        model_dir = tmp_path / "models"
+        lang, speaker, quality = voice.split("-")
+        url = f"https://huggingface.co/rhasspy/piper-voices/resolve/main/{lang.split('_')[0]}/{lang}/{speaker}/{quality}/{voice}.onnx"
+        with (
+            patch("cc_tts.engine._PIPER_MODEL_DIRS", [model_dir]),
+            patch("urllib.request.urlretrieve") as download,
+        ):
+            assert PiperEngine._resolve_model(voice) == str(model_dir / f"{voice}.onnx")
+        assert download.call_args_list[0].args == (url, model_dir / f"{voice}.onnx")
+        assert download.call_args_list[1].args == (f"{url}.json", model_dir / f"{voice}.onnx.json")
+
+    def test_resolve_cached_model_without_download(self, tmp_path: Path) -> None:
+        model = tmp_path / "en_US-amy-medium.onnx"
+        model.touch()
+        with (
+            patch("cc_tts.engine._PIPER_MODEL_DIRS", [tmp_path]),
+            patch("urllib.request.urlretrieve") as download,
+        ):
+            assert PiperEngine._resolve_model("en_US-amy-medium") == str(model)
+        download.assert_not_called()
+
+    def test_resolve_explicit_model_path(self, tmp_path: Path) -> None:
+        model = tmp_path / "custom-model.onnx"
+        model.touch()
+        with patch("urllib.request.urlretrieve") as download:
+            assert PiperEngine._resolve_model(str(model)) == str(model)
+        download.assert_not_called()
+
     def test_name(self) -> None:
         assert PiperEngine().name == "piper"
 
