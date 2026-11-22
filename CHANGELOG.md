@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Claude Code `.claude/settings.json` sets `BASH_MAX_OUTPUT_LENGTH` to `15000` and
+  `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to `50` ([env vars](https://code.claude.com/docs/en/env-vars));
+  `.claude/scripts/statusline.sh` is refreshed from claude-code-plugins 60388b9e: it shows context
+  used and the autocompact point, and guards non-numeric input
+
 ### Security
 
 - Ruff `S` (bandit-equivalent) rules enabled (#124). Tests ignore `S101`/`S108`; `src/` ignores `S603`/`S607` (fixed argv, no shell), matching `.bandit`; three model downloads from fixed https bases and four `Popen` pipe type-narrowing asserts carry inline `noqa` with the reason.
