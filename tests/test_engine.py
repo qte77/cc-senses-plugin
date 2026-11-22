@@ -70,7 +70,13 @@ class TestPiperEngine:
 
     @pytest.mark.parametrize(
         "voice",
-        ["/tmp/x-a-b", "../../../../tmp/x-a-b", "en_US/../x-amy-medium", "en_US-amy\\medium", "en_US-amy-medium\n"],
+        [
+            "/tmp/x-a-b",
+            "../../../../tmp/x-a-b",
+            "en_US/../x-amy-medium",
+            "en_US-amy\\medium",
+            "en_US-amy-medium\n",
+        ],
     )
     def test_resolve_model_rejects_path_like_voice(self, voice: str, tmp_path: Path) -> None:
         with (
