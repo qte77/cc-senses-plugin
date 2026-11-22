@@ -68,6 +68,36 @@ class TestPiperEngine:
         mock_run.assert_called_once()  # type: ignore[union-attr]
         assert mock_run.call_args.kwargs.get("input") == b"hello"  # type: ignore[union-attr]
 
+    @pytest.mark.parametrize(
+        "voice",
+        [
+            "/tmp/x-a-b",
+            "../../../../tmp/x-a-b",
+            "en_US/../x-amy-medium",
+            "en_US-amy\\medium",
+            "en_US-amy-medium\n",
+        ],
+    )
+    def test_resolve_model_rejects_path_like_voice(self, voice: str, tmp_path: Path) -> None:
+        with (
+            patch("cc_tts.engine._PIPER_MODEL_DIRS", [tmp_path / "models"]),
+            patch("urllib.request.urlretrieve") as mock_get,
+            pytest.raises(RuntimeError, match="Cannot resolve Piper voice"),
+        ):
+            PiperEngine._resolve_model(voice)
+        mock_get.assert_not_called()
+        assert not (tmp_path / "models").exists()
+
+    def test_resolve_model_downloads_plain_voice_into_model_dir(self, tmp_path: Path) -> None:
+        models = tmp_path / "models"
+        with (
+            patch("cc_tts.engine._PIPER_MODEL_DIRS", [models]),
+            patch("urllib.request.urlretrieve") as mock_get,
+        ):
+            result = PiperEngine._resolve_model("en_GB-northern_english_male-medium")
+        assert result == str(models / "en_GB-northern_english_male-medium.onnx")
+        assert mock_get.call_count == 2
+
 
 class TestKokoroEngine:
     def test_name(self) -> None:
