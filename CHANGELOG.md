@@ -8,6 +8,7 @@
   `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to `50` ([env vars](https://code.claude.com/docs/en/env-vars));
   `.claude/scripts/statusline.sh` is refreshed from claude-code-plugins 60388b9e: it shows context
   used and the autocompact point, and guards non-numeric input
+- Release workflows (`bump-my-version.yaml`, `tag-release.yaml`, `publish-release.yaml`) re-pinned to the `qte77/.github` v0.1.2 tag commit in tag form (`@aeef158f…  # v0.1.2`), so Dependabot can follow qte77/.github releases (#167). The called files are unchanged except `bump-version`, which gains the optional `scriv_pin` input (not used here).
 
 ### Security
 
